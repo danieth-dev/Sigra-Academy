@@ -7,7 +7,7 @@ export const notificationMock = [
         message: 'Se ha asignado una nueva tarea en la materia Matemáticas.',
         type: 'Alerta',
         is_read: false,
-        created_at: '2024-05-01T10:00:00Z'
+        created_at: '2024-05-01'
     }
     ,
     {
@@ -17,7 +17,7 @@ export const notificationMock = [
         message: 'El horario de la clase de Historia cambió a 09:00-10:30.',
         type: 'Info',
         is_read: false,
-        created_at: '2024-04-28T08:30:00Z'
+        created_at: '2024-04-28'
     },
     {
         notification_id: 3,
@@ -26,7 +26,7 @@ export const notificationMock = [
         message: 'Recuerda entregar el resumen antes del 15 de abril.',
         type: 'Alerta',
         is_read: true,
-        created_at: '2024-04-10T12:00:00Z'
+        created_at: '2024-04-10'
     },
     {
         notification_id: 4,
@@ -35,7 +35,7 @@ export const notificationMock = [
         message: 'Se publicó retroalimentación en la actividad Proyecto de Ciencias.',
         type: 'Academico',
         is_read: false,
-        created_at: '2024-05-13T16:20:00Z'
+        created_at: '2024-05-13'
     },
     {
         notification_id: 5,
@@ -44,7 +44,7 @@ export const notificationMock = [
         message: 'Tu cuenta ha sido activada por el administrador.',
         type: 'Info',
         is_read: true,
-        created_at: '2024-01-02T09:00:00Z'
+        created_at: '2024-01-02'
     },
     {
         notification_id: 6,
@@ -53,7 +53,7 @@ export const notificationMock = [
         message: 'Se agregó un nuevo recurso: Guía de estudio.',
         type: 'Academico',
         is_read: false,
-        created_at: '2024-02-01T10:05:00Z'
+        created_at: '2024-02-01'
     },
     {
         notification_id: 7,
@@ -62,7 +62,7 @@ export const notificationMock = [
         message: 'El sistema estará en mantenimiento el sábado.',
         type: 'Info',
         is_read: false,
-        created_at: '2024-03-15T18:00:00Z'
+        created_at: '2024-03-15'
     },
     {
         notification_id: 8,
@@ -71,7 +71,7 @@ export const notificationMock = [
         message: 'Tu nota para Actividad 1 ya está disponible.',
         type: 'Academico',
         is_read: false,
-        created_at: '2024-05-20T11:45:00Z'
+        created_at: '2024-05-20'
     },
     {
         notification_id: 9,
@@ -80,6 +80,6 @@ export const notificationMock = [
         message: 'Reunión de padres el próximo lunes a las 17:00.',
         type: 'Info',
         is_read: false,
-        created_at: '2024-06-01T07:30:00Z'
+        created_at: '2024-06-01'
     }
 ]

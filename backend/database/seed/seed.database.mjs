@@ -10,7 +10,6 @@ import {
     finalAcademicRecordsMock,
     gradesLogMock,
     notificationMock,
-    assignmentsMock,
     schedulesMock,
     sectionsMock,
     subjectsMock,
@@ -46,29 +45,26 @@ export const seedDatabase = async () => {
         await getSeedFunctionByTable('enrollments', enrollmentsMock);
         console.log('Datos de inscripciones insertados correctamente');
         await db.commit();
-        await getSeedFunctionByTable('activities', activitiesMock);
-        console.log('Datos de actividades insertados correctamente');
-        await db.commit();
-        await getSeedFunctionByTable('course_resources', courseResourcesMock);
-        console.log('Datos de recursos del curso insertados correctamente');
-        await db.commit();
-        await getSeedFunctionByTable('assignments', assignmentsMock);
-        console.log('Datos de asignaciones insertados correctamente');
+        await getSeedFunctionByTable('teacher_assignments', teacherAssignmentsMock);
+        console.log('Datos de asignaciones de profesores insertados correctamente');
         await db.commit();
         await getSeedFunctionByTable('schedules', schedulesMock);
         console.log('Datos de horarios insertados correctamente');
         await db.commit();
-        await getSeedFunctionByTable('teacher_assignments', teacherAssignmentsMock);
-        console.log('Datos de asignaciones de profesores insertados correctamente');
+        await getSeedFunctionByTable('activities', activitiesMock);
+        console.log('Datos de actividades insertados correctamente');
         await db.commit();
-        await getSeedFunctionByTable('submission', submissionMock);
+        await getSeedFunctionByTable('submissions', submissionMock);
         console.log('Datos de entregas insertados correctamente');
         await db.commit();
-        await getSeedFunctionByTable('final_academic_records', finalAcademicRecordsMock);
-        console.log('Datos de registros académicos finales insertados correctamente');
+        await getSeedFunctionByTable('course_resources', courseResourcesMock);
+        console.log('Datos de recursos del curso insertados correctamente');
         await db.commit();
         await getSeedFunctionByTable('grades_log', gradesLogMock);
         console.log('Datos de registros de calificaciones insertados correctamente');
+        await db.commit();
+        await getSeedFunctionByTable('final_academic_records', finalAcademicRecordsMock);
+        console.log('Datos de registros académicos finales insertados correctamente');
         await db.commit();
         await getSeedFunctionByTable('notifications', notificationMock);
         console.log('Datos de notificaciones insertados correctamente');
