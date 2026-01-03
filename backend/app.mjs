@@ -2,7 +2,7 @@ import express, {json} from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import { SETTINGS } from './config/settings.config.mjs';
-import apiRoutes from './src/api/routes/api.routes.mjs'
+import apiRoutes from './src/api/routes/api.routes.mjs';
 
 // Se inicializan el servidor express
 const app = express();
@@ -19,7 +19,8 @@ app.get('/', (req, res) => {
     res.send('Servidor funcionando correctamente');
 });
 
-app.use('/api', apiRoutes)
+// API Routes
+app.use('/api', apiRoutes);
 
 // Montamos el servidor
 app.listen(SETTINGS.PORT, () => {
