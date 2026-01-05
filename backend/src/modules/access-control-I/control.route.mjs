@@ -1,6 +1,6 @@
 import express from 'express'
-import { getUser, getUserByName, getUserByEmail, getUserRole, getAllUsers, registerUser, loginUser } from './control.controller.mjs'
-import { validateGetUser, validateGetUserName, validateGetUserEmail, validateGetRole } from './control.schema.mjs'
+import { getUser, getUserByName, getUserByEmail, getUserRole, getAllUsers, registerUser, loginUser, updateUser, deleteUser } from './control.controller.mjs'
+import { validateGetUser, validateGetUserName, validateGetUserEmail, validateGetRole, validateUpdateUser } from './control.schema.mjs'
 
 const router = express.Router()
 
@@ -12,6 +12,12 @@ router.post('/users/login', loginUser)
 
 // POST /users -> registrar usuario
 router.post('/users', registerUser)
+
+// PUT /users/:id -> actualizar usuario (rol, estado, etc)
+router.put('/users/:id', validateGetUser, validateUpdateUser, updateUser)
+
+// DELETE /users/:id -> eliminar usuario
+router.delete('/users/:id', validateGetUser, deleteUser)
 
 // GET /users/:id  -> devuelve usuario por user_id
 router.get('/users/:id', validateGetUser, getUser)

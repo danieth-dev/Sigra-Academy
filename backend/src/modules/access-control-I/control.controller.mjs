@@ -1,4 +1,4 @@
-import { getUser as getUserModel, getUserByName as getUserByNameModel, getUserByEmail as getUserByEmailModel, getUserRoleById as getUserRoleByIdModel, getAllUsers as getAllUsersModel, createUser as createUserModel } from './control.model.mjs'
+import { getUser as getUserModel, getUserByName as getUserByNameModel, getUserByEmail as getUserByEmailModel, getUserRoleById as getUserRoleByIdModel, getAllUsers as getAllUsersModel, createUser as createUserModel, updateUser as updateUserModel, deleteUser as deleteUserModel } from './control.model.mjs'
 import bcrypt from 'bcryptjs'
 
 export async function getUser(req, res) {
@@ -191,6 +191,77 @@ export async function registerUser(req, res) {
 		return res.status(201).json({ ok: true, user: result })
 	} catch (error) {
 		console.error('registerUser controller error:', error)
+		return res.status(500).json({ message: 'Internal server error' })
+	}
+}
+
+export async function updateUser(req, res) {
+	try {
+		const { id } = req.params
+		const userId = Number(id)
+		if (!userId || Number.isNaN(userId)) return res.status(400).json({ message: 'Invalid user id' })
+
+		const existing = await getUserModel(userId)
+		if (!existing) return res.status(404).json({ message: 'User not found' })
+
+		const { role_id, is_active, first_name, last_name, phone, email, password } = req.body || {}
+
+		const payload = {}
+		if (role_id !== undefined) payload.role_id = Number(role_id)
+		if (is_active !== undefined) payload.is_active = Boolean(is_active)
+		if (first_name !== undefined) payload.first_name = first_name
+		if (last_name !== undefined) payload.last_name = last_name
+		if (phone !== undefined) payload.phone = phone
+		if (email !== undefined) {
+			if (typeof email !== 'string' || !email.includes('@')) return res.status(400).json({ message: 'Email inválido' })
+			const duplicated = await getUserByEmailModel(email)
+			if (duplicated && duplicated.user_id !== userId) return res.status(409).json({ message: 'Email already registered' })
+			payload.email = email
+		}
+		if (password !== undefined) {
+			if (typeof password !== 'string' || password.length < 6) return res.status(400).json({ message: 'Password min 6 caracteres' })
+			payload.password_hash = bcrypt.hashSync(password, 10)
+		}
+
+		if (Object.keys(payload).length === 0) return res.status(400).json({ message: 'No fields to update' })
+
+		const updated = await updateUserModel(userId, payload)
+		if (!updated) return res.status(500).json({ message: 'Could not update user' })
+
+		const result = {
+			id: updated.user_id,
+			role_id: updated.role_id,
+			first_name: updated.first_name,
+			last_name: updated.last_name,
+			email: updated.email,
+			phone: updated.phone,
+			is_active: Boolean(updated.is_active),
+			created_at: updated.created_at,
+			updated_at: updated.updated_at
+		}
+
+		return res.status(200).json({ ok: true, user: result })
+	} catch (error) {
+		console.error('updateUser controller error:', error)
+		return res.status(500).json({ message: 'Internal server error' })
+	}
+}
+
+export async function deleteUser(req, res) {
+	try {
+		const { id } = req.params
+		const userId = Number(id)
+		if (!userId || Number.isNaN(userId)) return res.status(400).json({ message: 'Invalid user id' })
+
+		const existing = await getUserModel(userId)
+		if (!existing) return res.status(404).json({ message: 'User not found' })
+
+		const ok = await deleteUserModel(userId)
+		if (!ok) return res.status(500).json({ message: 'Could not delete user' })
+
+		return res.status(200).json({ ok: true })
+	} catch (error) {
+		console.error('deleteUser controller error:', error)
 		return res.status(500).json({ message: 'Internal server error' })
 	}
 }

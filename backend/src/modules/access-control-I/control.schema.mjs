@@ -48,7 +48,7 @@ export function validateGetUserEmail(req, res, next) {
 
 // Esquema para validar params de GET /roles/:id
 export const getRoleParamsSchema = z.object({
-  id: z.coerce.number().int().min(0)
+  id: z.coerce.number().int().positive()
 })
 
 export function validateGetRole(req, res, next) {
@@ -62,3 +62,24 @@ export function validateGetRole(req, res, next) {
 }
 
 export default { getUserParamsSchema, validateGetUser }
+
+// Body schema for updating user
+export const updateUserBodySchema = z.object({
+  role_id: z.number().int().positive().optional(),
+  is_active: z.boolean().optional(),
+  first_name: z.string().min(1).optional(),
+  last_name: z.string().min(1).optional(),
+  phone: z.string().min(3).optional(),
+  email: z.string().email().optional(),
+  password: z.string().min(6).optional()
+}).refine((data) => Object.keys(data).length > 0, { message: 'At least one field is required' })
+
+export function validateUpdateUser(req, res, next) {
+  const bodyResult = updateUserBodySchema.safeParse(req.body)
+  if (!bodyResult.success) {
+    return res.status(400).json({ message: 'Invalid body', errors: bodyResult.error.errors })
+  }
+
+  req.body = bodyResult.data
+  return next()
+}

@@ -93,4 +93,35 @@ export async function createUser({ email, first_name, last_name, phone, password
 	}
 }
 
-export default { getUser, getUserByName, getUserByEmail, getUserRoleById, getAllUsers, createUser }
+export async function updateUser(userId, fields) {
+	if (!userId || !fields || Object.keys(fields).length === 0) return null
+
+	const allowed = ['role_id', 'is_active', 'first_name', 'last_name', 'email', 'phone', 'password_hash']
+	const entries = Object.entries(fields).filter(([k, v]) => allowed.includes(k) && v !== undefined)
+	if (entries.length === 0) return null
+
+	const setClause = entries.map(([k]) => `${k} = ?`).join(', ')
+	const params = entries.map(([, v]) => v)
+
+	const query = `UPDATE users SET ${setClause}, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?`
+	try {
+		await db.execute(query, [...params, userId])
+		const [rows] = await db.execute('SELECT user_id, role_id, first_name, last_name, email, phone, is_active, created_at, updated_at FROM users WHERE user_id = ? LIMIT 1', [userId]);
+		if (!rows || rows.length === 0) return null
+		return rows[0]
+	} catch (error) {
+		throw error
+	}
+}
+
+export async function deleteUser(userId) {
+	if (!userId) return null
+	try {
+		const [res] = await db.execute('DELETE FROM users WHERE user_id = ?', [userId])
+		return res?.affectedRows > 0
+	} catch (error) {
+		throw error
+	}
+}
+
+export default { getUser, getUserByName, getUserByEmail, getUserRoleById, getAllUsers, createUser, updateUser, deleteUser }
