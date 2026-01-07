@@ -8,6 +8,17 @@ import { subjectRoute } from "./src/modules/academic-structure-II/subjects/subje
 import { prelaciesRoute } from "./src/modules/academic-structure-II/prelacies/prelacies.route.mjs";
 import managementRoute from "./src/modules/academic-structure-II/management/management.route.mjs";
 
+import express, {json} from 'express';
+import cors from 'cors';
+import morgan from 'morgan';
+import { SETTINGS } from './config/settings.config.mjs';
+import { ListRoutes } from './src/api/routes/api.routes.mjs';
+import { registerRoutes } from './src/core/utils/function.util.mjs';
+import controlRouter from './src/modules/access-control-I/control.route.mjs';
+import { getUser as getUserModel } from './src/modules/access-control-I/control.model.mjs';
+import { subjectRoute } from './src/modules/academic-structure-II/subjects/subjects.route.mjs';
+
+// Se inicializan el servidor express
 const app = express();
 
 // ===== CORS (Live Server) =====
@@ -48,6 +59,7 @@ app.get("/test/users", async (req, res) => {
 	}
 });
 
+registerRoutes(app, ListRoutes);
 // Montar rutas de access-control
 app.use('/api/access-control', controlRouter);
 
