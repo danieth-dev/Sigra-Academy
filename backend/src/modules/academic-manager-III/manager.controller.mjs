@@ -23,6 +23,26 @@ export const getCourseDetail = async (req, res) => {
   }
 }
 
+export const getScheduleByStudent = async (req, res) => {
+  try {
+    const { studentId } = req.params
+    const schedule = await courseModel.getScheduleByStudentId(studentId)
+    res.json({ success: true, data: schedule })
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message })
+  }
+}
+
+export const getActivitiesByAssignment = async (req, res) => {
+  try {
+    const { assignmentId } = req.params;
+    const activities = await courseModel.getActivitiesByAssignmentId(assignmentId);
+    res.json({ success: true, data: activities });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 /* Controlador para crear un nuevo curso */
 export const createCourse = async (req, res) => {
   try {
