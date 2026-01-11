@@ -1,2 +1,5 @@
 ### ruta para obtener todas las notificaciones 
 GET http://localhost:5200/api/notifications/all
+
+### ruta obetener las notificaciones por el id del usuario
+GET http://localhost:5200/api/notifications/notification/1
