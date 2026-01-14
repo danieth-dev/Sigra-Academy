@@ -8,6 +8,10 @@ import { prelaciesRoute } from "../../modules/academic-structure-II/prelacies/pr
 import { SectionRoutes } from "../../modules/academic-structure-II/sections/section.route.mjs";
 import { GradeRoutes } from "../../modules/academic-structure-II/grades/grade.route.mjs";
 import { YearRoutes } from "../../modules/academic-structure-II/years/year.route.mjs";
+import { AsignacionesRoutes } from "../../modules/teaching-manager-IV/asignaciones/asignaciones.route.mjs";
+import { AlumnosRoutes } from "../../modules/teaching-manager-IV/alumnos/alumnos.route.mjs";
+import { AsistenciaRoutes } from "../../modules/teaching-manager-IV/asistencia/asistencia.route.mjs";
+import { NotificationsRoutes } from "../notifications/notifications.route.mjs";
 
 const router = Router();
 
@@ -26,5 +30,14 @@ export const ListRoutes = {
     grades: {
         grades: router.use(`${SETTINGS.BASE_PATH}/grades-log`, GradesLogRoutes),
         records: router.use(`${SETTINGS.BASE_PATH}/records`, RecordsRoutes)
-    }  
+    },
+    teachingManager: {
+        asignaciones: router.use(`${SETTINGS.BASE_PATH}/assignments`, AsignacionesRoutes),
+        alumnos: router.use(`${SETTINGS.BASE_PATH}/alumnos`, AlumnosRoutes),
+        asistencia: router.use(`${SETTINGS.BASE_PATH}/attendance`, AsistenciaRoutes),
+        courseResources: router.use(`${SETTINGS.BASE_PATH}/course-resources`, (await import('../../modules/teaching-manager-IV/course-resources/course_resources.route.mjs')).CourseResourcesRoutes)
+    },
+    notifications: {
+        notifications: router.use(`${SETTINGS.BASE_PATH}/notifications`, NotificationsRoutes)
+    }
 }
