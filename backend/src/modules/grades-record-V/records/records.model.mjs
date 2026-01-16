@@ -144,10 +144,11 @@ export class AcademicRecordsModel {
             values.push(value);
         });
         values.push(recordId); // Para la cláusula WHERE
-        const updatedRecords = await db.query(
+        const [updatedRecords] = await db.query(
             `UPDATE final_academic_records SET ${fields.join(', ')} WHERE record_id = ?`,
             values
         );
+        if(updatedRecords.affectedRows === 0) return { error: 'No se pudo actualizar el registro académico.' };
         // Se obtiene el registro actualizado
         const [updatedRecord] = await db.query(
             `SELECT * FROM final_academic_records WHERE record_id = ?`,

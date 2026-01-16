@@ -1,0 +1,35 @@
+### ruta para obtener todas las notificaciones 
+GET http://localhost:5200/api/notifications/all
+
+### ruta obetener las notificaciones por el id del usuario
+GET http://localhost:5200/api/notifications/notification/1
+
+### Ruta para obtener una notificación específica por su ID
+GET http://localhost:5200/api/notifications/user/3
+
+### Ruta para crear una nueva notificación
+POST http://localhost:5200/api/notifications/create
+Content-Type: application/json
+
+{
+    "user_id": 1,
+    "title": "Nueva Notificación",
+    "message": "Este es el mensaje de la nueva notificación.",
+    "type": "Info"
+}
+
+### Ruta para marcar una notificación como leída
+PATCH http://localhost:5200/api/notifications/mark-as-read/10
+
+### Ruta para actualizar una notificación existente
+PATCH http://localhost:5200/api/notifications/update/10
+Content-Type: application/json
+
+{
+    "title": "Notificación Actualizada",
+    "message": "Este es el mensaje actualizado de la notificación.",
+    "type": "Alerta"
+}
+
+### Ruta para eliminar una notificación
+DELETE http://localhost:5200/api/notifications/delete/10

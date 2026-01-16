@@ -27,7 +27,7 @@ CREATE TABLE users (
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (role_id) REFERENCES roles(role_id)
+    FOREIGN KEY (role_id) REFERENCES roles(role_id) ON DELETE CASCADE
 );
 
 -- Tabla para Recuperación de Contraseñas
@@ -44,14 +44,6 @@ CREATE TABLE login_session (
 -- ==========================================
 -- MODULO 2: ESTRUCTURA ACADÉMICA (CEREBRO)
 -- ==========================================
-
-CREATE TABLE subject_prerequisites(
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    subject_id INT,
-    subject_prerequisites_id INT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (subject_id) REFERENCES subjects(subject_id) ON DELETE CASCADE
-);
 
 -- Años Académicos / Periodos (Ej: 2024-2025)
 CREATE TABLE academic_years (
@@ -76,8 +68,9 @@ CREATE TABLE sections (
     academic_year_id INT NOT NULL,
     section_name VARCHAR(5) NOT NULL, -- "A", "B", "C"
     capacity INT DEFAULT 20, -- Cupos máximos
-    FOREIGN KEY (grade_id) REFERENCES grades(grade_id),
-    FOREIGN KEY (academic_year_id) REFERENCES academic_years(year_id)
+    number_of_students INT DEFAULT 0, -- Cantidad actual de estudiantes inscritos
+    FOREIGN KEY (grade_id) REFERENCES grades(grade_id) ON DELETE CASCADE,
+    FOREIGN KEY (academic_year_id) REFERENCES academic_years(year_id) ON DELETE CASCADE
 );
 
 -- Materias (Catálogo general)
@@ -88,7 +81,17 @@ CREATE TABLE subjects (
     code_subject VARCHAR(140) NOT NULL,
     is_active BOOLEAN DEFAULT(TRUE), 
     description TEXT,
-    FOREIGN KEY (grade_id) REFERENCES grades(grade_id)
+    FOREIGN KEY (grade_id) REFERENCES grades(grade_id) ON DELETE CASCADE
+);
+
+-- Prerrequisitos de Materias
+CREATE TABLE subject_prerequisites(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    subject_id INT,
+    subject_prerequisites_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (subject_id) REFERENCES subjects(subject_id) ON DELETE CASCADE,
+    FOREIGN KEY (subject_prerequisites_id) REFERENCES subjects(subject_id) ON DELETE CASCADE
 );
 
 -- Matricula / Inscripción (Vincula Estudiante -> Sección)
@@ -100,8 +103,8 @@ CREATE TABLE enrollments (
     section_id INT NOT NULL,
     enrolled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status ENUM('active', 'dropped', 'completed') DEFAULT 'active',
-    FOREIGN KEY (student_user_id) REFERENCES users(user_id),
-    FOREIGN KEY (section_id) REFERENCES sections(section_id),
+    FOREIGN KEY (student_user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (section_id) REFERENCES sections(section_id) ON DELETE CASCADE,
     UNIQUE(student_user_id, section_id) -- Un estudiante solo en una sección por periodo
 );
 
@@ -116,9 +119,9 @@ CREATE TABLE teacher_assignments (
     teacher_user_id INT NOT NULL,
     subject_id INT NOT NULL,
     section_id INT NOT NULL,
-    FOREIGN KEY (teacher_user_id) REFERENCES users(user_id),
-    FOREIGN KEY (subject_id) REFERENCES subjects(subject_id),
-    FOREIGN KEY (section_id) REFERENCES sections(section_id),
+    FOREIGN KEY (teacher_user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (subject_id) REFERENCES subjects(subject_id) ON DELETE CASCADE,
+    FOREIGN KEY (section_id) REFERENCES sections(section_id) ON DELETE CASCADE,
     UNIQUE(subject_id, section_id) -- Solo un profesor por materia en una sección específica
 );
 
@@ -130,7 +133,7 @@ CREATE TABLE schedules (
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
     classroom VARCHAR(50), -- Aula física
-    FOREIGN KEY (assignment_id) REFERENCES teacher_assignments(assignment_id)
+    FOREIGN KEY (assignment_id) REFERENCES teacher_assignments(assignment_id) ON DELETE CASCADE
 );
 
 -- ==========================================
@@ -148,7 +151,7 @@ CREATE TABLE activities (
     is_active BOOLEAN DEFAULT TRUE,
     is_visible BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (assignment_id) REFERENCES teacher_assignments(assignment_id)
+    FOREIGN KEY (assignment_id) REFERENCES teacher_assignments(assignment_id) ON DELETE CASCADE
 );
 
 -- Entregas de Estudiantes (Buzón)
@@ -159,8 +162,8 @@ CREATE TABLE submissions (
     file_path VARCHAR(255), -- Ruta del archivo subido archive/grade/section/subjects/activity/student
     submission_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     comments TEXT, -- Comentarios del alumno
-    FOREIGN KEY (activity_id) REFERENCES activities(activity_id),
-    FOREIGN KEY (student_user_id) REFERENCES users(user_id)
+    FOREIGN KEY (activity_id) REFERENCES activities(activity_id) ON DELETE CASCADE,
+    FOREIGN KEY (student_user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
 -- Recursos Didácticos (Archivos de clase)
@@ -168,12 +171,21 @@ CREATE TABLE course_resources (
     resource_id INT AUTO_INCREMENT PRIMARY KEY,
     assignment_id INT NOT NULL,
     title VARCHAR(150) NOT NULL,
-    resource_type ENUM('PDF', 'Link', 'Video', 'Slide') NOT NULL,
+    resource_type ENUM('PDF', 'Video') NOT NULL,
     file_path_or_url VARCHAR(255) NOT NULL, 
     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (assignment_id) REFERENCES teacher_assignments(assignment_id)
+    FOREIGN KEY (assignment_id) REFERENCES teacher_assignments(assignment_id) ON DELETE CASCADE
 );
 
+-- Asistencia de Estudiantes
+CREATE TABLE course_access_log(
+    access_id INT AUTO_INCREMENT PRIMARY KEY,
+    student_user_id INT NOT NULL,
+    assignment_id INT NOT NULL,
+    access_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (student_user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (assignment_id) REFERENCES teacher_assignments(assignment_id) ON DELETE CASCADE
+);
 -- ==========================================
 -- MODULO 5: CALIFICACIONES
 -- ==========================================
@@ -186,8 +198,8 @@ CREATE TABLE grades_log (
     score DECIMAL(5,2) NOT NULL, -- Ej: 18.50
     feedback TEXT, -- Retroalimentación del docente
     graded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (activity_id) REFERENCES activities(activity_id),
-    FOREIGN KEY (student_user_id) REFERENCES users(user_id),
+    FOREIGN KEY (activity_id) REFERENCES activities(activity_id) ON DELETE CASCADE,
+    FOREIGN KEY (student_user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     UNIQUE(activity_id, student_user_id) -- Solo una nota por actividad por alumno
 );
 
@@ -200,8 +212,8 @@ CREATE TABLE final_academic_records (
     final_score DECIMAL(5,2) NOT NULL,
     status ENUM('Aprobado', 'Aplazado') NOT NULL,
     recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (student_user_id) REFERENCES users(user_id),
-    FOREIGN KEY (assignment_id) REFERENCES teacher_assignments(assignment_id)
+    FOREIGN KEY (student_user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (assignment_id) REFERENCES teacher_assignments(assignment_id) ON DELETE CASCADE
 );
 
 -- ==========================================
@@ -213,8 +225,8 @@ CREATE TABLE notifications (
     user_id INT NOT NULL, -- Destinatario
     title VARCHAR(100) NOT NULL,
     message TEXT NOT NULL,
-    type ENUM('Alerta', 'Info', 'Academico') DEFAULT 'Info',
+    type ENUM('Alerta', 'Info', 'Academico', 'Recordatorio') DEFAULT 'Info',
     is_read BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
