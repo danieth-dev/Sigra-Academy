@@ -92,8 +92,9 @@ export class UserModel {
 			[email]
 		);
 		if(existingUser.length === 0) return {error: 'Usuario no encontrado'};
-		// Si existe, se verifica la contraseña
-		const passwordMatch = await bcrypt.compare(password_hash, existingUser[0].password_hash);
+		// TEMP: contraseñas en DB no están hasheadas; se compara texto plano.
+		// const passwordMatch = await bcrypt.compare(password_hash, existingUser[0].password_hash);
+		const passwordMatch = password_hash === existingUser[0].password_hash;
 		if(!passwordMatch) return {error: 'Contraseña incorrecta'};
 		// Si es correcta, se asigna el token de sesión
 		const token = await assignTokenToSession(existingUser[0].user_id);

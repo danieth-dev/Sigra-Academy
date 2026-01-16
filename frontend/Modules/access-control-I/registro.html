@@ -6,12 +6,20 @@
   <title>SIGRA | Crear Cuenta</title>
   <link rel="stylesheet" href="login.css" />
   <link rel="stylesheet" href="registro.css" />
+  <style>
+    .top-actions { display: flex; justify-content: flex-start; margin-bottom: 8px; }
+    .back-button { text-decoration: none; padding: 10px 14px; border: 1px solid #1d4ed8; border-radius: 8px; color: #1d4ed8; font-weight: 600; background: #eef2ff; }
+    .back-button:hover { background: #e0e7ff; }
+  </style>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 </head>
 <body>
   <main class="page">
+    <div class="top-actions">
+      <a class="back-button" href="user-table.html">Volver a usuarios</a>
+    </div>
     <header class="brand">
       <img class="brand-logo" src="../../Public/resources/Modulo-1/logo.png" alt="Logo SIGRA" />
       <p class="brand-text"><span class="brand-accent">SIGRA:</span> Sistema Integral de Gestión y Registro Académico</p>
@@ -93,9 +101,7 @@
 
         <button class="primary-button" type="button" onclick="window.location.href='user-table.html'">Aceptar</button>
         
-        <div class="form-footer">
-            ¿Ya tienes cuenta? <a href="login.html" class="link-text">Inicia Sesión</a>
-        </div>
+       
 
       </form>
     </section>

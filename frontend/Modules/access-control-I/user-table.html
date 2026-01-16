@@ -10,16 +10,16 @@
   <!-- Navbar superior -->
   <header>
     <nav class="navbar" aria-label="Barra de navegación principal">
-      <div class="brand" aria-label="SIGRA">
+      <a class="brand" aria-label="SIGRA" href="user-table.html">
         <img class="brand-logo" src="../../Public/resources/Modulo-1/logo.png" alt="Logo SIGRA" />
         <span>SIGRA</span>
-      </div>
+      </a>
 
       <div class="nav-links" role="list">
-        <a class="active" href="#" role="listitem">Inicio</a>
-        <a href="#" role="listitem">Asignaturas</a>
-        <a href="#" role="listitem">Docentes</a>
-        <a href="#" role="listitem">Reportes</a>
+        <a class="active" href="user-table.html" role="listitem">Inicio</a>
+        <a href="../academic-structure-II/catalogo-materias/index.html" role="listitem">Catalogo</a>
+        <a href="../academic-structure-II/gestion-materias/index.html" role="listitem">Materias</a>
+        <a href="../academic-structure-II/definicion-prelaciones/index.html" role="listitem">Prelaciones</a>
       </div>
 
       <button class="bell" type="button" aria-label="Notificaciones">
@@ -51,7 +51,7 @@
         <input id="user-filter" type="text" placeholder="Buscar por nombre o correo" />
       </div>
       <div class="actions">
-        <button class="ghost-btn" type="button">Agregar usuario nuevo</button>
+        <button class="ghost-btn" type="button" id="add-user-btn">Agregar usuario nuevo</button>
       </div>
     </div>
 
@@ -88,7 +88,7 @@
     </section>
   </main>
   <script>
-    (function () {
+    document.addEventListener('DOMContentLoaded', () => {
       const API_BASE = 'http://localhost:3000/api/auth'
       const tbody = document.getElementById('users-body')
       const loadingRow = document.getElementById('users-loading')
@@ -191,6 +191,7 @@
           if (!response.ok) throw new Error('No se pudo obtener usuarios')
           const data = await response.json()
           allUsers = data.users || []
+          console.log('Usuarios cargados:', allUsers)
           renderUsers(allUsers)
         } catch (error) {
           tbody.innerHTML = `<tr><td colspan="5">${error.message}</td></tr>`
@@ -199,6 +200,7 @@
           if (loadingRow) loadingRow.remove()
         }
       }
+      console.log(allUsers)
 
       function openModal(user, mode = 'view') {
         const modal = document.getElementById('user-modal')
@@ -271,14 +273,22 @@
         }
       }
 
+      // Filtra la tabla en vivo al escribir en el buscador.
       document.getElementById('user-filter').addEventListener('input', applyFilter)
       document.getElementById('modal-close').addEventListener('click', closeModal)
       document.getElementById('user-modal-overlay').addEventListener('click', closeModal)
       document.getElementById('modal-save').addEventListener('click', saveUser)
 
+      const addUserBtn = document.getElementById('add-user-btn')
+      if (addUserBtn) {
+        addUserBtn.addEventListener('click', () => {
+          window.location.href = './registro.html'
+        })
+      }
+
       attachActions()
       loadUsers()
-    })()
+    })
   </script>
 
   <div id="user-modal-overlay" class="modal-overlay"></div>

@@ -60,9 +60,7 @@
         <div class="secondary-links">
           <a class="link-text" href="#">¿Olvidaste tu contraseña?</a>
             
-          <span class="secondary-note">
-            ¿No tienes cuenta? <a href="registro.html" class="link-text">Regístrate aquí</a>
-          </span>
+        
         </div>
 
       </form>
@@ -146,20 +144,20 @@
 
           const user = Array.isArray(result.user) ? result.user[0] : result.user
           const roleId = Number(user?.role_id)
+          localStorage.setItem('sigra_user_raw', JSON.stringify(result.user))
 
           if (!user) {
             setError(emailError, 'No se encontró el correo')
             return
           }
 
-          if (roleId !== 1) {
-            setError(passwordError, 'No tienes módulo todavía')
-            return
-          }
-
           if (result.token) {
             localStorage.setItem('sigra_token', result.token)
           }
+
+          // Guarda la respuesta completa del usuario que envía el backend
+          // para reutilizarla en otras vistas sin tener que volver a pedirla.
+          
 
           // Guardamos datos básicos del usuario para usarlos en el navbar u otras vistas
           const safeUser = {
@@ -172,7 +170,15 @@
           }
           localStorage.setItem('sigra_user', JSON.stringify(safeUser))
 
-          window.location.href = './user-table.html'
+          if (roleId === 1) {
+            window.location.href = './user-table.html'
+          } else if (roleId === 2) {
+            window.location.href = '../teaching-manager-IV/teacher.view.html'
+          } else if (roleId === 3) {
+            window.location.href = '../academic-manager-III/views/manager.view.html'
+          } else {
+            setError(passwordError, 'No tienes módulo asignado aún')
+          }
         } catch (error) {
           setError(emailError, 'No se pudo conectar con el servidor')
           console.error('Login error:', error)
