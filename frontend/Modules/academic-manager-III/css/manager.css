@@ -1,227 +1,153 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background-color: #f5f5f5;
-}
-
-.navbar {
-    background-color: #003d82;
-    color: white;
-    padding: 0;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    z-index: 1000;
-}
-
-.nav-container {
-    max-width: 1400px;
+/* Contenedor principal */
+.ContenedorMisClases {
+    max-width: 1200px;
     margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 32px;
+    padding: 40px 24px;
 }
 
-.nav-left {
+.TituloMisCursos {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: #111827;
+    margin-bottom: 32px;
+    letter-spacing: -0.025em;
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
-.logo {
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.brand {
-    font-size: 20px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-}
-
-.nav-menu {
-    display: flex;
-    gap: 32px;
-}
-
-.nav-link {
-    color: white;
-    text-decoration: none;
-    font-size: 15px;
-    padding: 8px 0;
-    border-bottom: 2px solid transparent;
-    transition: border-color 0.2s;
-}
-
-.nav-link:hover {
-    border-bottom-color: rgba(255, 255, 255, 0.5);
-}
-
-.nav-link.active {
-    border-bottom-color: white;
-}
-
-.nav-right {
-    display: flex;
-    align-items: center;
-}
-
-.user-icon {
-    width: 36px;
-    height: 36px;
-    background-color: rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-image: url('../../../Public/resources/Modulo-3/user-logo.png');
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.user-icon:hover {
-    background-color: rgba(255, 255, 255, 0.3);
-}
-
-/* Mis Cursos */
-
-.ContenedorMisClases{
-    max-width: 900px;
-    margin: 0 auto; /* Centrar contenedor */
-    padding: 88px 20px 0; /* Espacio superior para navbar fija y espacio lateral */
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.TituloMisCursos{
-    font-size: 2rem;
-    color: #333;
-    margin-bottom: 30px;
-}
-
-.cursosDisponibles{
-    display: flex;
-    flex-direction: column;
-    gap: 2px; /* Espacio entre cartas (casi pegadas) */
+/* Cuadrícula de Cursos */
+.cursosDisponibles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
     width: 100%;
 }
 
-.cartaDeCurso{
-    background-color: #FFFFFF;
+/* Tarjeta de Curso Estilo Dashboard */
+.cartaDeCurso {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    overflow: hidden;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;  /* Ancho completo*/
-    min-height: 120px; /* Altura minima*/
-    margin-bottom: 2px; /* Espacio inferior (casi pegado) */
+    flex-direction: column;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+}
+
+.cartaDeCurso:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    border-color: var(--primary);
+}
+
+/* Cabecera de la tarjeta (Imagen) */
+.ImagenDelCurso {
+    width: 100%;
+    height: 160px;
+    position: relative;
     overflow: hidden;
 }
 
-.cartaDeCurso:nth-child(odd){ /* Cartas impares grises*/
-    background-color: #F9F9F9;
-    border: none;
+.ImagenDelCurso img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
 }
 
-.infoDeCurso{
-    padding: 18px 26px;
+.cartaDeCurso:hover .ImagenDelCurso img {
+    transform: scale(1.05);
 }
 
-.gradoDelCurso{
-    color: #5c7cfa;
-    font-size: 0.85rem;
-    margin: 0 0 5px 0; /* Margen Inferior*/
-}
-
-.CursoNombre{
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0 0 6px 0;
-    font-size: 1.05rem;
+/* Badge de Sección flotante sobre la imagen */
+.badge-seccion {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(4px);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
     font-weight: 700;
-    color: #0b3a8a;
+    color: var(--primary);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.CursoProfesor{
-    margin: 0 0 6px 0;
-    font-size: 0.95rem;
-    color: #344054;
+/* Información del Curso */
+.infoDeCurso {
+    padding: 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Profesor como pequeño tag */
-.prof-name{
-    display: inline-block;
-    background: #e6f0ff;
-    color: #003366;
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-weight: 600;
-    margin-left: 6px;
-    font-size: 0.9rem;
+.CursoNombre {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 12px;
+    line-height: 1.3;
+    min-height: 3.4em; /* Asegura alineación */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
+.meta-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: auto;
+}
 
-
-.CursoPeriodo.small{
-    color: #6b7280;
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-size: 0.85rem;
+    color: #4b5563;
 }
 
-.ImagenDelCurso img{
-    width: 280px; /* Ancho*/
-    height: 140px; /* Altura*/
-    padding: 20px 30px;
-    object-fit: cover; /* Recorte para llenar espacio*/
-    display: block; /* No espacios residuales*/
+.meta-item svg {
+    color: #9ca3af;
+    flex-shrink: 0;
 }
 
-/* Redondeo de esquinas*/
-.ImagenDelCurso img{
-    width: 280px; /* Ancho*/
-    height: 140px; /* Altura*/
-    padding: 20px 30px;
-    object-fit: cover; /* Recorte para llenar espacio*/
-    display: block; /* No espacios residuales*/
-    border-radius: 40px; /* Esquinas redondeadas - más ligero */
+.prof-name {
+    background: #f3f4f6;
+    color: #374151;
+    padding: 2px 10px;
+    border-radius: 6px;
+    font-weight: 600;
 }
 
-.img-rounded{ /* Clase utilitaria: esquinas redondeadas */
-    border-radius: 30px;
+/* Pie de la tarjeta */
+.card-footer {
+    padding: 16px 20px;
+    border-top: 1px solid #f3f4f6;
+    background: #fafafa;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--primary);
 }
 
-.cartaDeCurso{
-    cursor: pointer;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:16px;
-    padding:14px;
-    border-radius:8px;
-    background:#ffffff; /* blanco por defecto */
-    border-left: 0;
-    margin-bottom:12px;
-    transition: background-color .15s ease, box-shadow .15s ease, transform .12s ease;
+/* Skeleton Loading (Para la carga inicial) */
+.skeleton-card {
+    height: 380px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #f7f7f7 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 16px;
 }
 
-.cartaDeCurso:hover{
-    background-color: #E8F0FF;
-    box-shadow: 0 4px 12px rgba(0, 47, 135, 0.08);
-    border-left: 6px solid #0b63b3;
-    transform: translateX(4px);
-}
-
-/* Estado seleccionado (solo si se aplica explícitamente) */
-.cartaDeCurso.selected{
-    background:#f3f8ff;
-    border-left:6px solid #0b63b3;
-    box-shadow: 0 6px 18px rgba(0,47,135,0.08);
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
 }
