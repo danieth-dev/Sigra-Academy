@@ -57,12 +57,10 @@
 
         <button class="primary-button" type="submit" id="login-button">Acceder</button>
         
-        <div style="display: flex; flex-direction: column; gap: 10px; text-align: center;">
-            <a class="link-text" href="#">¿Olvidaste tu contraseña?</a>
+        <div class="secondary-links">
+          <a class="link-text" href="#">¿Olvidaste tu contraseña?</a>
             
-            <span style="font-size: 14px; color: var(--neutral-500);">
-                ¿No tienes cuenta? <a href="registro.html" class="link-text">Regístrate aquí</a>
-            </span>
+        
         </div>
 
       </form>
@@ -77,25 +75,20 @@
 
   <script>
     (function () {
-      const API_BASE = 'http://localhost:3000/api/access-control'
+      const API_BASE = 'http://localhost:3000/api/auth'
       const form = document.querySelector('.form')
       const emailInput = document.getElementById('usuario')
       const passwordInput = document.getElementById('contrasena')
       const emailError = document.getElementById('email-error')
       const passwordError = document.getElementById('password-error')
       const loginButton = document.getElementById('login-button')
-      
-      // NUEVO: Lógica para el botón del Ojo
-      const toggleBtn = document.querySelector('.toggle-password-btn');
-      
-      if(toggleBtn) {
-          toggleBtn.addEventListener('click', () => {
-              // Alternar entre 'password' y 'text'
-              const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-              passwordInput.setAttribute('type', type);
-              
-              // Opcional: Aquí podrías añadir lógica para cambiar el icono del SVG si quisieras (ojo abierto/tachado)
-          });
+      const toggleBtn = document.querySelector('.toggle-password-btn')
+
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+          const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password'
+          passwordInput.setAttribute('type', type)
+        })
       }
 
       function setError(element, message) {
@@ -109,12 +102,15 @@
         setError(passwordError, '')
       }
 
-      async function fetchUserByEmail(email) {
-        // Nota: Si no tienes el servidor corriendo, esto dará error.
-        // Para pruebas frontend, el catch de abajo manejará la excepción.
-        const response = await fetch(`${API_BASE}/users/email/${encodeURIComponent(email)}`)
-        if (response.status === 404) return null
-        if (!response.ok) throw new Error('Error al consultar el usuario')
+      async function login({ email, password }) {
+        const response = await fetch(`${API_BASE}/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password_hash: password })
+        })
+
+        if (response.status === 404) return { error: 'No se encontró el correo' }
+        if (!response.ok) return { error: 'Credenciales inválidas' }
         return response.json()
       }
 
@@ -139,31 +135,51 @@
         loginButton.textContent = 'Validando...'
 
         try {
-          const user = await fetchUserByEmail(email)
+          const result = await login({ email, password })
+
+          if (result.error) {
+            setError(passwordError, result.error)
+            return
+          }
+
+          const user = Array.isArray(result.user) ? result.user[0] : result.user
+          const roleId = Number(user?.role_id)
+          localStorage.setItem('sigra_user_raw', JSON.stringify(result.user))
 
           if (!user) {
             setError(emailError, 'No se encontró el correo')
             return
           }
 
-          const storedPassword = user.password_hash || ''
-          const roleId = Number(user.role_id)
-
-          if (password === storedPassword && roleId === 1) {
-            window.location.href = './user-table.html'
-            return
+          if (result.token) {
+            localStorage.setItem('sigra_token', result.token)
           }
 
-          if (password === storedPassword && roleId !== 1) {
-            setError(passwordError, 'No tienes módulo todavía')
-            return
-          }
-
-          setError(passwordError, 'Contraseña incorrecta')
-        } catch (error) {
-          // Si no hay backend, puedes descomentar la siguiente línea para probar el login forzado:
-          // if (email === 'test@test.com' && password === '123') window.location.href = './user-table.html';
+          // Guarda la respuesta completa del usuario que envía el backend
+          // para reutilizarla en otras vistas sin tener que volver a pedirla.
           
+
+          // Guardamos datos básicos del usuario para usarlos en el navbar u otras vistas
+          const safeUser = {
+            id: user.user_id,
+            role_id: roleId,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            email: user.email,
+            phone: user.phone
+          }
+          localStorage.setItem('sigra_user', JSON.stringify(safeUser))
+
+          if (roleId === 1) {
+            window.location.href = './user-table.html'
+          } else if (roleId === 2) {
+            window.location.href = '../teaching-manager-IV/teacher.view.html'
+          } else if (roleId === 3) {
+            window.location.href = '../academic-manager-III/views/manager.view.html'
+          } else {
+            setError(passwordError, 'No tienes módulo asignado aún')
+          }
+        } catch (error) {
           setError(emailError, 'No se pudo conectar con el servidor')
           console.error('Login error:', error)
         } finally {
