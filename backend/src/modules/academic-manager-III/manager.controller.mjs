@@ -1,6 +1,6 @@
 import * as courseModel from './manager.model.mjs'
 import { GradesLogModel } from '../grades-record-V/grades/grades.model.mjs'
-
+import { db } from '../../../database/db.database.mjs'
 /* Controlador para obtener cursos de un estudiante */
 export const getCoursesByStudent = async (req, res) => {
   try {
@@ -51,13 +51,11 @@ export const getGradesByAssignment = async (req, res) => {
   try {
     const { assignmentId } = req.params;
 
-    // Intentar obtener desde el modelo si existe una tabla de calificaciones
     if (courseModel.getGradesByAssignmentId) {
       const grades = await courseModel.getGradesByAssignmentId(assignmentId);
       return res.json({ success: true, data: grades });
     }
 
-    // Fallback mock
     const mock = [
       { name: 'Tarea 1', score: 8, max: 10, feedback: 'Bien hecho' },
       { name: 'Parcial', score: 25, max: 30, feedback: 'Revisar ejercicios 3 y 4' }
@@ -73,10 +71,19 @@ export const getGradesByAssignment = async (req, res) => {
 export const uploadActivitySubmission = async (req, res) => {
   try {
     const { activityId } = req.params;
+    const { studentId } = req.body;
+
     if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
 
-    // Aquí podríamos guardar metadatos en la base de datos (no implementado)
+    // Inserción real en la tabla submissions
+    const [result] = await db.query(
+      `INSERT INTO submissions (activity_id, student_user_id, file_path, comments) 
+       VALUES (?, ?, ?, ?)`,
+      [activityId, studentId || 3, req.file.path, 'Entrega realizada por el estudiante']
+    );
+
     const fileInfo = {
+      submissionId: result.insertId,
       originalName: req.file.originalname,
       filename: req.file.filename,
       path: req.file.path,
@@ -86,6 +93,7 @@ export const uploadActivitySubmission = async (req, res) => {
 
     res.status(201).json({ success: true, data: fileInfo });
   } catch (error) {
+    console.error("Error en uploadActivitySubmission:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -119,6 +127,7 @@ export const createCourse = async (req, res) => {
     res.status(500).json({ success: false, message: error.message })
   }
 }
+
 /* Controlador para obtener resumen académico del estudiante */
 export const getStudentAcademicSummary = async (req, res) => {
   try {

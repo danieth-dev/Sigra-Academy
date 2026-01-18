@@ -1,5 +1,5 @@
 // Configuración API y orden de días
-const API_URL = 'http://localhost:3000/api/academic-manager';
+const API_URL = 'http://localhost:3000/api/manager';
 const STUDENT_ID = 3;
 const dayOrder = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
 const stepMinutes = 30; // intervalo de 30 minutos para el grid
