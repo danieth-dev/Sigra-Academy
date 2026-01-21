@@ -3,11 +3,32 @@ import { db } from "../../../../database/db.database.mjs";
 // Modelo que interactua con la tabla sections de la base de datos
 export class SectionModel {
     // Método para obtener todas las secciones academicas
-    static async getAllSections(){
+    static async getAllSections() {
         const [sections] = await db.query(
-            `SELECT * FROM sections`
+            `SELECT s.*, g.grade_name 
+             FROM sections s
+             JOIN grades g ON s.grade_id = g.grade_id
+             ORDER BY s.grade_id ASC, s.section_name ASC`
         );
-        if(sections.length === 0) return {error: 'No hay secciones registradas'};
+        if (sections.length === 0) return { error: 'No hay secciones registradas' };
+        return {
+            message: 'Secciones obtenidas correctamente',
+            sections: sections
+        }
+    }
+
+    // Método para obtener secciones por grado
+    static async getSectionsByGrade(gradeId) {
+        if (!gradeId) return { error: 'El ID del grado es requerido' };
+        const [sections] = await db.query(
+            `SELECT s.section_id, s.section_name, s.capacity, s.number_of_students, g.grade_name
+            FROM sections s
+            JOIN grades g ON s.grade_id = g.grade_id
+            WHERE s.grade_id = ?
+            ORDER BY s.section_name ASC`,
+            [gradeId]
+        );
+        if (sections.length === 0) return { error: 'No hay secciones para este grado' };
         return {
             message: 'Secciones obtenidas correctamente',
             sections: sections
@@ -15,8 +36,8 @@ export class SectionModel {
     }
 
     // Método para obtener una sección académica por su ID
-    static async getSectionById(sectionId){
-        if(!sectionId) return {error: 'El ID de la sección es requerido'};
+    static async getSectionById(sectionId) {
+        if (!sectionId) return { error: 'El ID de la sección es requerido' };
         const [section] = await db.query(
             `SELECT s.section_id, s.section_name, s.capacity, g.grade_name,
             ay.name
@@ -32,8 +53,8 @@ export class SectionModel {
             WHERE e.section_id = ?`,
             [sectionId]
         )
-        if(students.length === 0) return {error: 'No hay estudiantes asignados a esta sección'};
-        if(section.length === 0) return {error: 'Sección no encontrada'};
+        if (students.length === 0) return { error: 'No hay estudiantes asignados a esta sección' };
+        if (section.length === 0) return { error: 'Sección no encontrada' };
         return {
             message: 'Sección obtenida correctamente',
             section: {
@@ -44,9 +65,9 @@ export class SectionModel {
     }
 
     // Método para crear una nueva sección académica
-    static async createSection(data){
-        if(!data) return {error: 'Faltan datos para crear la sección'};
-        const {grade_id, academic_year_id, ...rest} = data;
+    static async createSection(data) {
+        if (!data) return { error: 'Faltan datos para crear la sección' };
+        const { grade_id, academic_year_id, ...rest } = data;
         // Se verifica si el grado existe y el año académico existe
         const [exisitingGrade] = await db.query(
             `SELECT * FROM grades WHERE grade_id = ?`,
@@ -56,8 +77,8 @@ export class SectionModel {
             `SELECT * FROM academic_years WHERE year_id = ?`,
             [academic_year_id]
         );
-        if(exisitingGrade.length === 0 || existingAcademicYear.length === 0){
-            return {error: 'Grado o año académico no encontrado'};
+        if (exisitingGrade.length === 0 || existingAcademicYear.length === 0) {
+            return { error: 'Grado o año académico no encontrado' };
         }
         // Si existen, se crea la sección
         const [newSection] = await db.query(
@@ -70,7 +91,7 @@ export class SectionModel {
             `SELECT * FROM sections WHERE section_id = ?`,
             [newSection.insertId]
         );
-        if(createdSection.length === 0) return {error: 'Error al crear la sección'};
+        if (createdSection.length === 0) return { error: 'Error al crear la sección' };
         return {
             message: 'Sección creada correctamente',
             section: createdSection
@@ -78,12 +99,12 @@ export class SectionModel {
     }
 
     // Método para actualizar una sección académica
-    static async updateSection(sectionId, data){
-        if(!sectionId || !data) return {error: 'El ID de la sección y los datos son requeridos'};
+    static async updateSection(sectionId, data) {
+        if (!sectionId || !data) return { error: 'El ID de la sección y los datos son requeridos' };
         const allowedFields = ['section_name', 'capacity'];
         const updateToFields = {};
-        for(const field of allowedFields){
-            if(data[field] !== undefined){
+        for (const field of allowedFields) {
+            if (data[field] !== undefined) {
                 updateToFields[field] = data[field];
             }
         }
@@ -93,7 +114,7 @@ export class SectionModel {
             `SELECT * FROM sections WHERE section_id = ?`,
             [sectionId]
         );
-        if(existingSection.length === 0) return {error: 'Sección no encontrada'};
+        if (existingSection.length === 0) return { error: 'Sección no encontrada' };
         // Si existe, se procede a actualizarla
         const fields = [];
         const values = [];
@@ -107,7 +128,7 @@ export class SectionModel {
             `UPDATE sections SET ${fields.join(', ')} WHERE section_id = ?`,
             values
         );
-        if(updatedSection.affectedRows === 0) return {error: 'Error al actualizar la sección'};
+        if (updatedSection.affectedRows === 0) return { error: 'Error al actualizar la sección' };
         // Se obtiene la sección actualizada
         const [section] = await db.query(
             `SELECT * FROM sections WHERE section_id = ?`,
@@ -120,14 +141,14 @@ export class SectionModel {
     }
 
     // Método para borrar una sección académica
-    static async deleteSection(sectionId){
-        if(!sectionId) return {error: 'El ID de la sección es requerido'};
+    static async deleteSection(sectionId) {
+        if (!sectionId) return { error: 'El ID de la sección es requerido' };
         // Se verifica si la sección existe
         const [existingSection] = await db.query(
             `SELECT * FROM sections WHERE section_id = ?`,
             [sectionId]
         );
-        if(existingSection.length === 0) return {error: 'Sección no encontrada'};
+        if (existingSection.length === 0) return { error: 'Sección no encontrada' };
         // Si existe, se borra la sección
         await db.query(
             `DELETE FROM sections WHERE section_id = ?`,
