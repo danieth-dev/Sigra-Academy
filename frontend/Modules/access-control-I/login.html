@@ -109,9 +109,16 @@
           body: JSON.stringify({ email, password_hash: password })
         })
 
-        if (response.status === 404) return { error: 'No se encontró el correo' }
-        if (!response.ok) return { error: 'Credenciales inválidas' }
-        return response.json()
+        let data
+        try {
+          data = await response.json()
+        } catch (_) {
+          data = null
+        }
+
+        if (response.status === 404) return { error: data?.message || 'No se encontró el correo' }
+        if (!response.ok) return { error: data?.message || data?.error || response.statusText || 'Ocurrió un error al iniciar sesión' }
+        return data
       }
 
       form.addEventListener('submit', async (event) => {

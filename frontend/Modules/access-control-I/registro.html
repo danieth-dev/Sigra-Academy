@@ -12,21 +12,38 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 </head>
 <body>
-  <nav class="navbar" aria-label="Barra de navegación principal">
-      <a class="brand" aria-label="SIGRA" href="registro.html">
+  <header>
+    <nav class="navbar" aria-label="Barra de navegación principal">
+      <a class="brand" aria-label="SIGRA" href="user-table.html">
         <img class="brand-logo" src="../../Public/resources/Modulo-1/logo.png" alt="Logo SIGRA" />
         <span>SIGRA</span>
       </a>
+
       <div class="nav-links" role="list">
         <a class="active" href="user-table.html" role="listitem">Inicio</a>
         <a href="../academic-structure-II/catalogo-materias/index.html" role="listitem">Catalogo</a>
         <a href="../academic-structure-II/gestion-materias/index.html" role="listitem">Materias</a>
         <a href="../academic-structure-II/definicion-prelaciones/index.html" role="listitem">Prelaciones</a>
-        <a href="../academic-structure-II/gestionar-asignacion.html" role="listitem">Inscripción</a>
+        <a href="../academic-structure-II/index.html" role="listitem"> Inscripción</a> 
+        <a href="../academic-structure-II/gestionar-asignacion.html" role="listitem">Asignacion</a>
       </div>
 
+      <div class="profile-menu" aria-label="Menú de perfil">
+        <button class="profile-button" id="profile-button" type="button" aria-haspopup="true" aria-expanded="false">
+          <span class="profile-avatar" id="profile-avatar" aria-hidden="true">--</span>
+          <span class="sr-only">Abrir menú de perfil</span>
+        </button>
+        <div class="profile-dropdown" id="profile-dropdown" role="menu">
+          <ul class="profile-list" role="menu">
+            <li class="profile-info" id="profile-info-name" role="presentation">Usuario</li>
+            <li role="none"><button type="button" class="profile-item" data-profile-action="create" role="menuitem">Crear usuario</button></li>
+            <li role="none"><button type="button" class="profile-item" data-profile-action="edit" role="menuitem">Editar usuario</button></li>
+            <li role="none"><button type="button" class="profile-item" data-profile-action="logout" role="menuitem">Cerrar sesión</button></li>
+          </ul>
+        </div>
       </div>
     </nav>
+  </header>
 
   </header>
   <main class="page">
@@ -142,6 +159,7 @@
     });
   </script>
 
+  <script src="registro-navbar.js"></script>
   <script src="registro.js"></script>
 </body>
 </html>
