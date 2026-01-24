@@ -1,5 +1,5 @@
-const API_URL = 'http://localhost:3000/api/manager';
-const SUBMISSIONS_API = 'http://localhost:3000/api/submissions';
+const API_URL = 'http://localhost:5200/api/manager';
+const SUBMISSIONS_API = 'http://localhost:5200/api/submissions';
 const STUDENT_ID = 3;
 
 document.addEventListener('DOMContentLoaded', () => {

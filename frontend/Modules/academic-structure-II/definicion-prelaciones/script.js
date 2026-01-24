@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Determine API base URL. We'll probe the current origin to see if it serves the API;
     // otherwise fall back to the backend at localhost:3000. You can override by setting
     // `window.API_BASE = 'http://localhost:3000'` in the browser console before reload.
-    let API_BASE = window.API_BASE || 'http://localhost:3000';
+    let API_BASE = window.API_BASE || 'http://localhost:5200';
 
     async function resolveApiBase() {
         const origin = window.location && window.location.origin ? window.location.origin : null;

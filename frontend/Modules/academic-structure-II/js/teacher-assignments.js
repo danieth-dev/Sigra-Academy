@@ -1,7 +1,7 @@
 ;(function () {
     // Follow the project's pattern: allow overriding `window.API_BASE` in the console,
     // probe the current origin and fall back to a local backend base.
-    let API_BASE = window.API_BASE || 'http://localhost:3000';
+    let API_BASE = window.API_BASE || 'http://localhost:5200';
 
     async function resolveApiBase() {
         const origin = window.location && window.location.origin ? window.location.origin : null;

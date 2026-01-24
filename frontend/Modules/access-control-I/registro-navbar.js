@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const API_BASE = 'http://localhost:3000/api/auth'
+  const API_BASE = 'http://localhost:5200/api/auth'
   const profileBtn = document.getElementById('profile-button')
   const profileDropdown = document.getElementById('profile-dropdown')
   const profileAvatar = document.getElementById('profile-avatar')

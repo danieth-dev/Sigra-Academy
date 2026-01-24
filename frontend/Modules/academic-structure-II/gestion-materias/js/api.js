@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:3000/api";
+const BASE_URL = "http://localhost:5200/api";
 
 console.log('[API] Módulo api.js cargado. BASE_URL:', BASE_URL);
 

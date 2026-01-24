@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 password_hash: password
             };
 
-            const API_BASE = 'http://localhost:3000/api';
+            const API_BASE = 'http://localhost:5200/api';
             try {
                 const res = await fetch(`${API_BASE}/auth/register`, {
                     method: 'POST',

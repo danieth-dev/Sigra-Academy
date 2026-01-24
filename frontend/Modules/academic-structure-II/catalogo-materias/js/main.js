@@ -3,7 +3,7 @@
 // ==========================================
 
 const viewContainer = document.getElementById('view-container');
-const API_BASE = 'http://localhost:3000/api/subjects'; // Puerto correcto del backend
+const API_BASE = 'http://localhost:5200/api/subjects'; // Puerto correcto del backend
 
 let materias = []; // Array global para las materias
 let currentPage = 1;
