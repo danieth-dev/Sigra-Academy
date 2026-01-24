@@ -18,6 +18,8 @@ app.use(morgan("dev"));
 app.use(activityNotifierMiddleware);
 
 app.use('/uploads', express.static('uploads'));
+app.use('/uploads/resources', express.static('uploads/resources'));
+app.use('/uploads/submissions', express.static('uploads/submissions'));
 
 // Registro de rutas
 registerRoutes(app, ListRoutes);

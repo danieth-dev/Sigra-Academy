@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'http://localhost:5200/api';
 
 document.addEventListener('DOMContentLoaded', async () => {
     const user = JSON.parse(localStorage.getItem('sigra_user'));
@@ -79,7 +79,7 @@ async function cargarMaterialApoyo() {
                     <h4 style="margin:10px 0; font-size:1rem;">${r.title}</h4>
                     <p style="font-size:0.75em; color:#666; margin-bottom:10px;">Tipo: ${r.resource_type}</p>
                     
-                    <a href="http://localhost:3000/${r.file_path_or_url}" target="_blank" 
+                    <a href="http://localhost:5200/uploads/resources/${r.file_path_or_url.split('\\').pop()}" target="_blank" 
                        class="btn-primario" style="text-decoration:none; display:inline-block; font-size:0.85rem; padding:5px 10px; background:#123E6A; color:white; border-radius:5px;">
                         <i class="fas fa-external-link-alt"></i> Ver Recurso
                     </a>

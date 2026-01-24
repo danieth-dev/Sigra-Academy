@@ -5,7 +5,7 @@ const currentUserProfesor = { id: 2, name: 'María González', role: 'profesor' 
 const currentUserEstudiante = { id: 3, name: 'Luis Ramírez', role: 'estudiante', seccion: 'A' };
 
 // URL base del backend (cambiar si el servidor está en otra URL/puerto)
-const API_BASE = 'http://localhost:4300/api';
+const API_BASE = 'http://localhost:5200/api';
 
 // Exponer flag para mostrar UI de desarrollo solo en entornos locales
 const IS_LOCALHOST = ['localhost','127.0.0.1'].includes(location.hostname);
@@ -15,6 +15,31 @@ window.__SHOW_DEV_UI__ = !!(IS_LOCALHOST || window.__DEBUG || false);
 window.currentUserProfesor = currentUserProfesor;
 window.currentUserEstudiante = currentUserEstudiante;
 window.API_BASE = API_BASE;
+
+// Monkey-patch `fetch` for relative API routes so existing code can keep
+// calling `fetch('/some/path')` and receive parsed JSON. Absolute URLs
+// and requests that expect the raw Response object must use full URLs
+// (e.g. `${API_BASE}/...`) and will be handled by the original fetch.
+(() => {
+    try{
+        const originalFetch = window.fetch.bind(window);
+        window._originalFetch = originalFetch;
+        window.fetch = async (input, init) => {
+            try{
+                // If input is a string and starts with '/' treat as backend-relative
+                if(typeof input === 'string' && input.startsWith('/')){
+                    // Use apiFetch which returns parsed JSON or throws on network/error
+                    return await window.apiFetch(input, init);
+                }
+                // If input is a Request or absolute URL, use original fetch
+                return await originalFetch(input, init);
+            }catch(err){
+                // Re-throw the error so callers receive consistent behavior
+                throw err;
+            }
+        };
+    }catch(e){ console.warn('Could not patch fetch; falling back to native fetch', e); }
+})();
 
 // Helper para llamadas API con manejo de errores y validación de JSON
 window._backend_offline = false;
@@ -30,16 +55,50 @@ window._showBackendOfflineBanner = () => {
     }
 };
 
-// Helper: quick health check against server root /_health. Returns true/false
+// Helper: quick health check that attempts multiple candidate API bases.
+// Tries `window.__API_BASE__` (if provided) then common local ports (5200, 3000).
+// On first successful health response it sets `window.API_BASE` accordingly.
 window.checkBackendHealth = async (timeout = 3000) => {
-    const healthUrl = (window.API_BASE || 'http://localhost:4300/api').replace(/\/api$/, '') + '/_health';
-    try{
-        const controller = new AbortController();
-        const id = setTimeout(() => controller.abort(), timeout);
-        const res = await fetch(healthUrl, { method: 'GET', signal: controller.signal });
-        clearTimeout(id);
-        return res && res.ok && String(await res.text()).trim().toLowerCase() === 'ok';
-    }catch(e){ return false; }
+    const candidates = [];
+    if(window.__API_BASE__) candidates.push(window.__API_BASE__);
+    // prefer same hostname as page served from (useful when served from local HTTP server)
+    const host = (location && location.hostname) ? location.hostname : 'localhost';
+    candidates.push(`http://${host}:5200/api`);
+    candidates.push(`http://${host}:3000/api`);
+    // allow user override via env or global
+    if(window.API_BASE && !candidates.includes(window.API_BASE)) candidates.push(window.API_BASE);
+
+    // For each candidate base try a few light GET endpoints until one responds.
+    const fallbackPaths = ['/_health', '/', '/assignments', '/course-resources/resources', '/notifications/stream'];
+    // Add user-specific fallbacks when available (non-destructive GETs)
+    try{ if(window.currentUserProfesor && window.currentUserProfesor.id) fallbackPaths.push(`/assignments/teacher/${String(window.currentUserProfesor.id)}`); }catch(e){}
+    try{ if(window.currentUserEstudiante && window.currentUserEstudiante.id) fallbackPaths.push(`/assignments/student/${String(window.currentUserEstudiante.id)}/assignments`); }catch(e){}
+
+    for(const base of candidates){
+        if(!base) continue;
+        const baseRoot = String(base).replace(/\/api$/, '').replace(/\/$/, '');
+        for(const p of fallbackPaths){
+            try{
+                const url = (p.startsWith('/') ? baseRoot + p : baseRoot + '/' + p);
+                const controller = new AbortController();
+                const id = setTimeout(() => controller.abort(), timeout);
+                const res = await (window._originalFetch || fetch)(url, { method: 'GET', signal: controller.signal });
+                clearTimeout(id);
+                if(!res) continue;
+                // If path is _health expect body 'ok'
+                if(p === '/_health'){
+                    if(res.ok){
+                        try{ const text = String(await res.text()).trim().toLowerCase(); if(text === 'ok'){ window.API_BASE = base; return true; } }
+                        catch(e){ /* ignore parse */ }
+                    }
+                    continue;
+                }
+                // For other endpoints accept any 200-299 response as healthy
+                if(res.ok){ window.API_BASE = base; return true; }
+            }catch(e){ /* try next path */ }
+        }
+    }
+    return false;
 };
 window.apiFetch = async (pathOrUrl, options = {}) => {
     const url = (typeof pathOrUrl === 'string' && pathOrUrl.startsWith('http')) ? pathOrUrl : `${API_BASE}${pathOrUrl}`;
