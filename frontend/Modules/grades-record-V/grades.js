@@ -28,6 +28,18 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentGrades = []
   let currentEditId = null
 
+  function getGradeId(g){
+    return g && (g.grade_id ?? g.id ?? g._id ?? g.gradeId ?? g._id_str ?? null)
+  }
+
+  function normalizeGrade(g){
+    if(!g) return g
+    const id = getGradeId(g)
+    // Ensure a canonical `grade_id` property for internal logic
+    if(id && String(g.grade_id) !== String(id)) g.grade_id = id
+    return g
+  }
+
   function showLoading(message = 'Cargando...') {
     tbody.innerHTML = `<tr><td colspan="5">${message}</td></tr>`
   }
@@ -38,19 +50,21 @@ document.addEventListener('DOMContentLoaded', () => {
       return
     }
     const rows = list.map(g => {
+      g = normalizeGrade(g)
       const student = g.student_name || `${g.student_user_id || 'N/D'}`
       const score = g.score ?? '-'
       const feedback = g.feedback ?? '-'
       const activity = g.title || g.activity || g.activity_id || '-'
+      const idAttr = getGradeId(g) || ''
       return `
-        <tr data-id="${g.grade_id}">
+        <tr data-id="${idAttr}">
           <td>${student}</td>
           <td>${score}</td>
           <td>${feedback}</td>
           <td>${activity}</td>
           <td class="actions-cell">
-            <button data-action="edit" data-id="${g.grade_id}" class="icon-link">Editar</button>
-            <button data-action="delete" data-id="${g.grade_id}" class="icon-link danger">Eliminar</button>
+            <button data-action="edit" data-id="${idAttr}" class="icon-link">Editar</button>
+            <button data-action="delete" data-id="${idAttr}" class="icon-link danger">Eliminar</button>
           </td>
         </tr>
       `
@@ -65,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const res = await fetch(`${GRADES_BASE}/activity/${activityId}`, { headers: { ...getAuthHeaders() } })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || data.message || 'Error al obtener registros')
-      currentGrades = data.grades || []
+      currentGrades = (data.grades || []).map(normalizeGrade)
       renderGrades(currentGrades)
     } catch (err) {
       showLoading(err.message)
@@ -80,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const res = await fetch(`${GRADES_BASE}/activity/${activityId}/subject/${subjectId}`, { headers: { ...getAuthHeaders() } })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || data.message || 'Error')
-      currentGrades = data.grades || []
+      currentGrades = (data.grades || []).map(normalizeGrade)
       renderGrades(currentGrades)
     } catch (err) {
       showLoading(err.message)
@@ -90,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Obtener actividades por assignment (materia del profesor) y luego cargar todas las calificaciones
   async function loadActivitiesByAssignment(assignmentId) {
-    if (!assignmentId) return showLoading('Seleccione una materia.')
+    if (!assignmentId) return showLoading('Seleccione una asignación válida.')
     showLoading('Cargando actividades de la asignación...')
     try {
       const res = await fetch(`${ASSIGNMENTS_BASE}/assignment/${assignmentId}/activities`, { headers: { ...getAuthHeaders() } })
@@ -118,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const r = await fetch(`${GRADES_BASE}/activity/${a.activity_id}`, { headers: { ...getAuthHeaders() } })
           const jd = await r.json()
           if (r.ok && Array.isArray(jd.grades)) {
-            const decorated = jd.grades.map(g => ({ ...g, title: a.title }))
+            const decorated = jd.grades.map(g => normalizeGrade({ ...g, title: a.title }))
             combined = combined.concat(decorated)
           }
         } catch (e) {
@@ -139,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const res = await fetch(`${GRADES_BASE}/all`, { headers: { ...getAuthHeaders() } })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || data.message || 'Error')
-      currentGrades = data.grades || []
+      currentGrades = (data.grades || []).map(normalizeGrade)
       // Intentar poblar select con TODAS las actividades del sistema
       let populated = false
       try{
@@ -177,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       // Poblar select de estudiantes: si hay asignación seleccionada, se carga por asignación; si no, intentar cargar todos
       try{
-        const assignmentId = subjectSelect.value ? subjectSelect.value : null
+        const assignmentId = (subjectSelect && subjectSelect.value) ? subjectSelect.value : (sessionStorage.getItem('active_assignment') || null)
         if(assignmentId) await loadStudentsByAssignment(assignmentId)
         else await loadAllStudents()
       }catch(e){
@@ -264,7 +278,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const btn = ev.target.closest('button[data-action]')
     if (!btn) return
     const action = btn.dataset.action
-    const id = btn.dataset.id
+    // Prefer button dataset, fallback to row data-id
+    const id = btn.dataset.id || (btn.closest && btn.closest('tr') && btn.closest('tr').dataset && btn.closest('tr').dataset.id) || null
     if (action === 'edit') openEditModal(id)
     if (action === 'delete') confirmAndDelete(id)
   })
@@ -306,9 +321,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || data.message || 'No se pudo actualizar')
       const idx = currentGrades.findIndex(g => String(g.grade_id) === String(currentEditId))
-      if (idx >= 0) currentGrades[idx] = (Array.isArray(data.grade) ? data.grade[0] : data.grade) || currentGrades[idx]
+      if (idx >= 0) currentGrades[idx] = normalizeGrade((Array.isArray(data.grade) ? data.grade[0] : data.grade) || currentGrades[idx])
       renderGrades(currentGrades)
       closeModal()
+      try{ if(window.refreshSubmissions) window.refreshSubmissions() }catch(e){}
     } catch (err) {
       alert(err.message)
       console.error(err)
@@ -323,6 +339,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!res.ok) throw new Error(data.error || data.message || 'No se pudo eliminar')
       currentGrades = currentGrades.filter(g => String(g.grade_id) !== String(id))
       renderGrades(currentGrades)
+      try{ if(window.refreshSubmissions) window.refreshSubmissions() }catch(e){}
     } catch (err) {
       alert(err.message)
       console.error(err)
@@ -336,8 +353,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Load only the assignments/subjects that belong to the logged-in teacher
   async function loadTeacherAssignments(){
-    const stored = JSON.parse(localStorage.getItem('user') || 'null')
-    const teacherId = stored ? stored.user_id : null
+    // Try multiple keys for backward compatibility: 'sigra_user' (used by other modules) or 'user'
+    const stored = JSON.parse(localStorage.getItem('sigra_user') || localStorage.getItem('user') || 'null')
+    const teacherId = stored ? stored.user_id || stored.id : null
     if(!teacherId){
       console.warn('No se encontró usuario en localStorage. Cargando materias globales como fallback.')
       return loadAllSubjectsFallback()
@@ -347,19 +365,49 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json()
       if(!res.ok) throw new Error(data.error || data.message || 'Error al cargar asignaciones del profesor')
       const courses = data.courses || []
-      // Evitar duplicados por subject using assignment_id
-      subjectSelect.innerHTML = '<option value="">-- Seleccione materia --</option>'
-      courses.forEach(c => {
-        const opt = document.createElement('option')
-        opt.value = c.assignment_id || c.assignmentId || ''
-        opt.textContent = c.subject_name || c.subject || `Materia ${opt.value}`
-        subjectSelect.appendChild(opt)
-      })
+      // Evitar duplicados por subject using assignment_id (si existe el select en esta página)
+      if(subjectSelect){
+        subjectSelect.innerHTML = '<option value="">-- Seleccione materia --</option>'
+        courses.forEach(c => {
+          const opt = document.createElement('option')
+          opt.value = c.assignment_id || c.assignmentId || ''
+          opt.textContent = c.subject_name || c.subject || `Materia ${opt.value}`
+          subjectSelect.appendChild(opt)
+        })
+      }
     }catch(err){
       console.error('No se pudieron cargar las asignaciones del profesor:', err)
       return loadAllSubjectsFallback()
     }
   }
+
+  // If an active assignment was set by the teacher module, preselect it and load its activities
+  (function tryLoadActiveAssignment(){
+    try{
+      const active = sessionStorage.getItem('active_assignment') || null
+      if(active){
+        if(subjectSelect){
+          // wait until subjectSelect is populated, attempt to set value later
+          const waitForSelect = setInterval(() => {
+            if(subjectSelect.options.length > 1){
+              subjectSelect.value = active
+              loadActivitiesByAssignment(active)
+              clearInterval(waitForSelect)
+            }
+          }, 200)
+          // after a timeout, still try to load by assignment id
+          setTimeout(() => {
+            if(subjectSelect.value !== active){
+              loadActivitiesByAssignment(active)
+            }
+          }, 2000)
+        } else {
+          // No subject select on the page — load directly using active assignment
+          loadActivitiesByAssignment(active)
+        }
+      }
+    }catch(e){ console.warn('No fue posible cargar la asignación activa desde sessionStorage', e) }
+  })()
 
   // Fallback: load all subjects if no teacher info
   async function loadAllSubjectsFallback(){
@@ -381,14 +429,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Create grade
   async function createGrade() {
-    const payload = {
-      activity_id: Number(createActivitySelect.value) || null,
-      student_user_id: Number(createStudent.value) || null,
-      score: Number(createScore.value) || null,
-      feedback: (createFeedback.value || '').trim()
+    const rawActivity = createActivitySelect.value
+    const rawStudent = createStudent.value
+    const rawScore = createScore.value
+    const rawFeedback = (createFeedback.value || '').trim()
+
+    console.debug('createGrade inputs', { rawActivity, rawStudent, rawScore, rawFeedback })
+
+    if (!rawActivity || !rawStudent) {
+      alert('Seleccione actividad y estudiante antes de crear.\nActividad: ' + (rawActivity || '(vacío)') + '\nEstudiante: ' + (rawStudent || '(vacío)'))
+      return
     }
-    if (!payload.activity_id || !payload.student_user_id || payload.score === null || isNaN(payload.score)) {
-      return alert('Seleccione actividad, seleccione un estudiante y proporcione una nota válida.')
+
+    const scoreNum = Number(rawScore)
+    if (rawScore === '' || isNaN(scoreNum)) {
+      return alert('Proporcione una nota válida.')
+    }
+
+    const activity_id = (/^\d+$/.test(String(rawActivity)) ? Number(rawActivity) : rawActivity)
+    const student_user_id = (/^\d+$/.test(String(rawStudent)) ? Number(rawStudent) : rawStudent)
+
+    const payload = {
+      activity_id,
+      student_user_id,
+      score: scoreNum,
+      feedback: rawFeedback
     }
     try {
       const res = await fetch(`${GRADES_BASE}/create`, {
@@ -405,32 +470,51 @@ document.addEventListener('DOMContentLoaded', () => {
       createScore.value = ''
       createFeedback.value = ''
       refreshCurrentList()
+      try{ if(window.refreshSubmissions) window.refreshSubmissions() }catch(e){}
     } catch (err) {
       alert(err.message)
       console.error(err)
     }
   }
 
-  btnLoad.addEventListener('click', () => {
-    const assignmentId = subjectSelect.value ? subjectSelect.value : null
-    if (!assignmentId) return alert('Seleccione una materia (asignación).')
-    loadActivitiesByAssignment(assignmentId)
-  })
-  btnAll.addEventListener('click', loadAll)
-  btnCreate.addEventListener('click', createGrade)
+  if(btnLoad){
+    btnLoad.addEventListener('click', () => {
+      const assignmentId = (subjectSelect && subjectSelect.value) ? subjectSelect.value : (sessionStorage.getItem('active_assignment') || null)
+      if (!assignmentId) return alert('No hay asignación activa. Abra el módulo del profesor para seleccionar su curso.')
+      loadActivitiesByAssignment(assignmentId)
+    })
+  }
+  if(btnAll) btnAll.addEventListener('click', loadAll)
+  if(btnCreate) btnCreate.addEventListener('click', createGrade)
 
   function refreshCurrentList() {
-    const assignmentId = subjectSelect.value ? subjectSelect.value : null
+    const assignmentId = (subjectSelect && subjectSelect.value) ? subjectSelect.value : (sessionStorage.getItem('active_assignment') || null)
     if (assignmentId) return loadActivitiesByAssignment(assignmentId)
     return loadAll()
   }
 
-  subjectSelect.addEventListener('change', () => {
-    const assignmentId = subjectSelect.value ? subjectSelect.value : null
-    if (assignmentId) loadActivitiesByAssignment(assignmentId)
-  })
+  if(subjectSelect){
+    subjectSelect.addEventListener('change', () => {
+      const assignmentId = subjectSelect.value ? subjectSelect.value : null
+      if (assignmentId) loadActivitiesByAssignment(assignmentId)
+    })
+  }
 
   // Initialize subjects (assignments for the logged-in teacher)
   loadTeacherAssignments()
+  // Expose helper functions to other modules (e.g., teaching-manager)
+  // Abre el formulario de creación con actividad y estudiante preseleccionados
+  window.openGradeCreate = function(activityId, studentUserId){
+    try{
+      if(activityId) createActivitySelect.value = String(activityId)
+      if(studentUserId) createStudent.value = String(studentUserId)
+      // Scroll to create section if exists
+      const cs = createActivitySelect.closest('.table-card') || createActivitySelect
+      cs.scrollIntoView({behavior: 'smooth', block: 'center'})
+    }catch(e){ console.warn('openGradeCreate error', e) }
+  }
+
+  // Permitir que otros módulos refresquen la lista mostrada
+  window.refreshGradesList = refreshCurrentList
 
 })

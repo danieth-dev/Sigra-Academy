@@ -18,28 +18,28 @@ export const sectionsMock = [
         section_id: 3,
         grade_id: 1,
         academic_year_id: 2,
-        section_name: 'A',
+        section_name: 'C',
         capacity: 30
     },
     {
         section_id: 4,
         grade_id: 1,
         academic_year_id: 2,
-        section_name: 'B',
+        section_name: 'D',
         capacity: 30
     },
     {
         section_id: 5,
         grade_id: 1,
         academic_year_id: 3,
-        section_name: 'A',
+        section_name: 'E',
         capacity: 30
     },
     {
         section_id: 6,
         grade_id: 1,
         academic_year_id: 3,
-        section_name: 'B',
+        section_name: 'F',
         capacity: 30
     },
     {
@@ -60,28 +60,28 @@ export const sectionsMock = [
         section_id: 9,
         grade_id: 2,
         academic_year_id: 2,
-        section_name: 'A',
+        section_name: 'C',
         capacity: 30
     },
     {
         section_id: 10,
         grade_id: 2,
         academic_year_id: 2,
-        section_name: 'B',
+        section_name: 'D',
         capacity: 30
     },
     {
         section_id: 11,
         grade_id: 2,
         academic_year_id: 3,
-        section_name: 'A',
+        section_name: 'E',
         capacity: 30
     },
     {
         section_id: 12,
         grade_id: 2,
         academic_year_id: 3,
-        section_name: 'B',
+        section_name: 'F',
         capacity: 30
     },
     {
@@ -102,28 +102,28 @@ export const sectionsMock = [
         section_id: 15,
         grade_id: 3,
         academic_year_id: 2,
-        section_name: 'A',
+        section_name: 'C',
         capacity: 30
     },
     {
         section_id: 16,
         grade_id: 3,
         academic_year_id: 2,
-        section_name: 'B',
+        section_name: 'D',
         capacity: 30
     },
     {
         section_id: 17,
         grade_id: 3,
         academic_year_id: 3,
-        section_name: 'A',
+        section_name: 'E',
         capacity: 30
     },
     {
         section_id: 18,
         grade_id: 3,
         academic_year_id: 3,
-        section_name: 'B',
+        section_name: 'F',
         capacity: 30
     },
     {
@@ -144,28 +144,28 @@ export const sectionsMock = [
         section_id: 21,
         grade_id: 4,
         academic_year_id: 2,
-        section_name: 'A',
+        section_name: 'C',
         capacity: 30
     },
     {
         section_id: 22,
         grade_id: 4,
         academic_year_id: 2,
-        section_name: 'B',
+        section_name: 'D',
         capacity: 30
     },
     {
         section_id: 23,
         grade_id: 4,
         academic_year_id: 3,
-        section_name: 'A',
+        section_name: 'E',
         capacity: 30
     },
     {
         section_id: 24,
         grade_id: 4,
         academic_year_id: 3,
-        section_name: 'B',
+        section_name: 'F',
         capacity: 30
     },
     {
@@ -186,28 +186,28 @@ export const sectionsMock = [
         section_id: 27,
         grade_id: 5,
         academic_year_id: 2,
-        section_name: 'A',
+        section_name: 'C',
         capacity: 30
     },
     {
         section_id: 28,
         grade_id: 5,
         academic_year_id: 2,
-        section_name: 'B',
+        section_name: 'D',
         capacity: 30
     },
     {
         section_id: 29,
         grade_id: 5,
         academic_year_id: 3,
-        section_name: 'A',
+        section_name: 'E',
         capacity: 30
     },
     {
         section_id: 30,
         grade_id: 5,
         academic_year_id: 3,
-        section_name: 'B',
+        section_name: 'F',
         capacity: 30
     }
 ]

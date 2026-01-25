@@ -7,7 +7,6 @@ import {
     courseResourcesMock,
     enrollmentsMock,
     gradesMock,
-    finalAcademicRecordsMock,
     gradesLogMock,
     notificationMock,
     schedulesMock,
@@ -62,9 +61,6 @@ export const seedDatabase = async () => {
         await db.commit();
         await getSeedFunctionByTable('grades_log', gradesLogMock);
         console.log('Datos de registros de calificaciones insertados correctamente');
-        await db.commit();
-        await getSeedFunctionByTable('final_academic_records', finalAcademicRecordsMock);
-        console.log('Datos de registros académicos finales insertados correctamente');
         await db.commit();
         await getSeedFunctionByTable('notifications', notificationMock);
         console.log('Datos de notificaciones insertados correctamente');

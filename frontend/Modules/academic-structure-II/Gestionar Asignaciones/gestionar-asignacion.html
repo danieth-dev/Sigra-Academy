@@ -433,7 +433,7 @@
             }
         }
 
-        function openSubjectModal() {
+        async function openSubjectModal() {
             const modal = document.getElementById('subjectModal');
             const list = document.getElementById('subjectList');
             modal.classList.remove('hidden');
@@ -441,7 +441,7 @@
 
             list.innerHTML = '<p class="text-center text-gray-400 py-4">Cargando materias...</p>';
 
-            fetch(`${API_BASE}/subjects/grade/${currentGradeId}`)
+            await fetch(`${API_BASE}/subjects/grade/${currentGradeId}`)
                 .then(res => res.json())
                 .then(data => {
                     list.innerHTML = '';

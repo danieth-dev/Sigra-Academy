@@ -42,13 +42,12 @@ export class TeacherAssignmentModel {
         // Si existe, se obtienen los cursos asignados
         const [courses] = await db.query(
             `SELECT ta.assignment_id, s.subject_name, sec.section_name, g.grade_name,
-            ay.name, act.title, act.due_date, act.weight_percentage, CONCAT(u.first_name, ' ', u.last_name) AS teacher_name
+            ay.name, CONCAT(u.first_name, ' ', u.last_name) AS teacher_name
             FROM teacher_assignments ta JOIN subjects s ON ta.subject_id = s.subject_id
             JOIN sections sec ON ta.section_id = sec.section_id
             JOIN grades g ON sec.grade_id = g.grade_id
             JOIN users u ON ta.teacher_user_id = u.user_id
             JOIN academic_years ay ON sec.academic_year_id = ay.year_id
-            LEFT JOIN activities act ON ta.assignment_id = act.assignment_id
             WHERE ta.teacher_user_id = ?`,
             [teacherId]
         );

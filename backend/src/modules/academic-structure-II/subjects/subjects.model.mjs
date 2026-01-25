@@ -46,32 +46,22 @@ export class subjectModel {
         }
     }
 
-    // metodo para obtener materias por grado
+    // Metodo para obtener materias por grado
     static async getSubjectsByGrade(gradeId) {
         if (!gradeId) return { error: "El ID del grado es requerido" }
-
         const [subjects] = await db.query(
             `SELECT s.*, g.grade_name
              FROM subjects s
              JOIN grades g ON s.grade_id = g.grade_id
-             WHERE s.grade_id = ? AND s.is_active = 1
-             ORDER BY s.subject_name ASC`,
+             WHERE s.grade_id = ?`,
             [gradeId]
         );
-
-        if (subjects.length === 0) {
-            return {
-                message: "No hay materias activas para este grado",
-                subjects: []
-            }
-        }
-
+        if (subjects.length === 0) return { error: "No se han encontrado materias para este grado" }
         // Map grade_name to anio for frontend compatibility
         const mappedSubjects = subjects.map(subject => ({
             ...subject,
             anio: subject.grade_name
         }));
-
         return {
             message: "Materias obtenidas exitosamente",
             subjects: mappedSubjects
