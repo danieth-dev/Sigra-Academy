@@ -56,7 +56,7 @@ export class SubmissionModel {
         // Se verifica si existe el estudiante
         const [existingUser] = await db.query(
             `SELECT u.* FROM users u JOIN roles r ON u.role_id = r.role_id
-            WHERE u.user_id = ? AND r.role_name = 'Estudiante'`,
+            WHERE u.user_id = ? AND r.role_name = 'student'`,
             [studentUserId]
         );
         if (existingUser.length === 0) return { error: 'El estudiante no existe' };
@@ -91,7 +91,7 @@ export class SubmissionModel {
         // Además, se verifica si existe el estudiante
         const [existingUser] = await db.query(
             `SELECT u.* FROM users u JOIN roles r ON u.role_id = r.role_id
-            WHERE u.user_id = ? AND r.role_name = 'Estudiante'`,
+            WHERE u.user_id = ? AND r.role_name = 'student'`,
             [student_user_id]
         );
         if (existingActivity.length === 0 || existingUser.length === 0) {

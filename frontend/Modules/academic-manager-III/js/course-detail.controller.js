@@ -85,7 +85,7 @@ async function loadResources(assignmentId) {
         container.innerHTML = data.map(res => {
             const filePath = res.file_path_or_url || "";
             const isPdf = res.resource_type === 'PDF' || filePath.toLowerCase().endsWith('.pdf');
-            const finalURL = filePath.startsWith('http') ? filePath : `http://localhost:3000/${filePath.replace(/\\/g, '/')}`;
+            const finalURL = filePath.startsWith('http') ? filePath : `http://localhost:5200/${filePath.replace(/\\/g, '/')}`;
 
             return `
                 <a href="${finalURL}" target="_blank" class="resource-item">
@@ -111,7 +111,7 @@ async function loadActivities(assignmentId) {
         const resActivities = await fetch(`${API_URL}/courses/${assignmentId}/activities`);
         const dataActivities = await resActivities.json();
 
-        const resSubmissions = await fetch(`http://localhost:3000/api/submissions/students/${STUDENT_ID}/submissions`);
+        const resSubmissions = await fetch(`http://localhost:5200/api/submissions/students/${STUDENT_ID}/submissions`);
         const dataSubmissions = await resSubmissions.json();
 
         if (!dataActivities.success || !dataActivities.data || dataActivities.data.length === 0) {
