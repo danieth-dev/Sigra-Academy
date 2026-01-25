@@ -8,6 +8,8 @@ const controller = new SubmissionController({SubmissionModel: SubmissionModel});
 // Rutas relacionadas a las entregas
 // Ruta para obtener todas las entregas de una actividad
 router.get('/activities/:activityId/submissions', controller.getSubmissionByActivityId);
+// Ruta para obtener todas las entregas de una asignación
+router.get('/assignments/:assignmentId/submissions', controller.getSubmissionByAssignmentId);
 // Ruta para obtener una entrega por su ID
 router.get('/submission/:submissionId', controller.getSubmissionById);
 // Ruta para obtener todas las entregas de un estudiante

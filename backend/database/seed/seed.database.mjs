@@ -3,17 +3,9 @@ import {
     usersMock, 
     roleMock, 
     academicYearsMock,
-    activitiesMock,
-    courseResourcesMock,
-    enrollmentsMock,
     gradesMock,
-    gradesLogMock,
-    notificationMock,
-    schedulesMock,
     sectionsMock,
     subjectsMock,
-    submissionMock,
-    teacherAssignmentsMock
 } from "../../src/mocks/index.mjs";
 import { getSeedFunctionByTable } from "../../src/core/utils/function.util.mjs";
 // Función para insertar los datos de prueba en la base de datos
@@ -41,31 +33,7 @@ export const seedDatabase = async () => {
         await getSeedFunctionByTable('subjects', subjectsMock);
         console.log('Datos de materias insertados correctamente');
         await db.commit();
-        await getSeedFunctionByTable('enrollments', enrollmentsMock);
-        console.log('Datos de inscripciones insertados correctamente');
-        await db.commit();
-        await getSeedFunctionByTable('teacher_assignments', teacherAssignmentsMock);
-        console.log('Datos de asignaciones de profesores insertados correctamente');
-        await db.commit();
-        await getSeedFunctionByTable('schedules', schedulesMock);
-        console.log('Datos de horarios insertados correctamente');
-        await db.commit();
-        await getSeedFunctionByTable('activities', activitiesMock);
-        console.log('Datos de actividades insertados correctamente');
-        await db.commit();
-        await getSeedFunctionByTable('submissions', submissionMock);
-        console.log('Datos de entregas insertados correctamente');
-        await db.commit();
-        await getSeedFunctionByTable('course_resources', courseResourcesMock);
-        console.log('Datos de recursos del curso insertados correctamente');
-        await db.commit();
-        await getSeedFunctionByTable('grades_log', gradesLogMock);
-        console.log('Datos de registros de calificaciones insertados correctamente');
-        await db.commit();
-        await getSeedFunctionByTable('notifications', notificationMock);
-        console.log('Datos de notificaciones insertados correctamente');
-        await db.commit();
-        console.log('Seed de la base de datos completado exitosamente');
+        console.log("Semilla académica insertada correctamente");
         await db.end();
     } 
     catch (error) {

@@ -158,7 +158,7 @@ export class TeacherAssignmentModel {
         if (existingAssignment.length === 0) return { error: 'Asignación no encontrada' };
         // Si existe, se obtiene el profesor y la asignación
         const [assignment] = await db.query(
-            `SELECT ta.section_id, u.user_id, CONCAT(u.first_name, ' ', u.last_name) as name, 'teacher' as role
+            `SELECT ta.assignment_id ,u.user_id, CONCAT(u.first_name, ' ', u.last_name) as name, 'teacher' as role
             FROM teacher_assignments ta JOIN users u ON ta.teacher_user_id = u.user_id
             WHERE ta.assignment_id = ?`,
             [assignmentId]
@@ -166,10 +166,12 @@ export class TeacherAssignmentModel {
         if (assignment.length === 0) return { error: 'No se encontró el profesor para esta asignación' };
         // A su vez se obtienen los estudiantes de esa sección
         const [students] = await db.query(
-            `SELECT u.user_id, CONCAT(u.first_name, ' ', u.last_name) as name, 'Estudiante' as role
-            FROM enrollments e JOIN users u ON e.student_user_id = u.user_id
-            WHERE e.section_id = ?`,
-            [assignment[0].section_id]
+            `SELECT u.user_id, CONCAT(u.first_name, ' ', u.last_name) as name, 'student' as role,
+            sec.section_id, sec.section_name FROM enrollments e JOIN users u ON e.student_user_id = u.user_id
+            JOIN sections sec ON e.section_id = sec.section_id JOIN teacher_assignments ta ON sec.section_id = ta.section_id
+            WHERE ta.assignment_id = ?
+            `,
+            [assignment[0].assignment_id]
         );
         if (students.length === 0) return { error: 'No se encontraron estudiantes para esta asignación' };
         return {

@@ -29,6 +29,37 @@ export class SubmissionModel {
         }
     }
 
+    // Método para obtener todas las entregas de actividades de una asignación
+    static async getSubmissionByAssignmentId(assignmentId){
+        if(!assignmentId) return { error: 'El ID de la asignación es requerido' };
+        // Se verifica si existe la asignación
+        const [existingAssignment] = await db.query(
+            `SELECT * FROM teacher_assignments WHERE assignment_id = ?`,
+            [assignmentId]
+        );
+        if (existingAssignment.length === 0) return { error: 'La asignación no existe' };
+        // Si existe, se obtienen las entregas asociadas
+        const [submissions] = await db.query(
+            `SELECT sub.submission_id, act.activity_id, act.title, CONCAT(u.first_name, ' ', u.last_name) AS full_name,
+            sub.file_path, sub.student_user_id, sub.submission_date, sub.comments, sec.section_name, g.grade_name,
+            gl.grade_id AS grade_log_id, gl.score AS numeric_score, gl.feedback AS grade_feedback
+            FROM submissions sub
+            JOIN activities act ON sub.activity_id = act.activity_id
+            JOIN teacher_assignments ta ON act.assignment_id = ta.assignment_id
+            JOIN sections sec ON ta.section_id = sec.section_id
+            JOIN grades g ON sec.grade_id = g.grade_id
+            JOIN users u ON sub.student_user_id = u.user_id
+            LEFT JOIN grades_log gl ON gl.activity_id = sub.activity_id AND gl.student_user_id = sub.student_user_id
+            WHERE ta.assignment_id = ?`,
+            [assignmentId]
+        );
+        if (submissions.length === 0) return { error: 'No hay entregas para esta asignación' };
+        return {
+            message: 'Entregas obtenidas exitosamente',
+            submissions: submissions
+        }
+    }
+
     // Método para obtener una entrega por su ID
     static async getSubmissionById(submissionId) {
         if (!submissionId) return { error: 'El ID de la entrega es requerido' };

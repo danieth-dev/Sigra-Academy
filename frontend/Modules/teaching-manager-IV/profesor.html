@@ -198,127 +198,8 @@
                         </table>
                     </div>
                 </div>
-
-                <div style="display:flex; gap:12px; align-items:start;">
-                    <div style="flex:1; min-width:320px;">
-                        <div class="table-card" style="padding:12px; border:1px solid #eee; border-radius:8px;">
-                            <h3 style="margin-top:0;">Crear / Registrar Calificación</h3>
-                            <div style="display:grid; grid-template-columns: 1fr 1fr 120px; gap:10px; align-items:end;">
-                                <label>Actividad
-                                    <select id="create-activity-select"><option value="">-- Seleccione actividad --</option></select>
-                                </label>
-                                <label>Estudiante
-                                    <select id="create-student-select"><option value="">-- Seleccione estudiante --</option></select>
-                                </label>
-                                <label>Nota
-                                    <input id="create-score" type="number" min="0" max="100" />
-                                </label>
-                            </div>
-                            <div style="margin-top:8px;">
-                                <label>Feedback</label>
-                                <textarea id="create-feedback" rows="2" style="width:100%;"></textarea>
-                            </div>
-                            <div style="margin-top:10px; text-align:right;">
-                                <button id="btn-create" class="btn btn-primary">Crear calificación</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="flex:1; min-width:360px;">
-                        <div class="table-card" style="padding:12px; border:1px solid #eee; border-radius:8px;">
-                            <h3 style="margin-top:0;">Registros de Calificaciones</h3>
-                            <div class="table-wrapper" style="overflow:auto; max-height:360px;">
-                                <table style="width:100%; border-collapse:collapse;">
-                                    <thead>
-                                        <tr>
-                                            <th>Estudiante</th>
-                                            <th>Nota</th>
-                                            <th>Feedback</th>
-                                            <th>Actividad</th>
-                                            <th>Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="grades-body">
-                                        <tr><td colspan="5">Use el panel de entregas para calificar o presione 'Cargar Actividades'.</td></tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="table-card" style="margin-bottom:16px; padding:12px; border:1px solid #eee; border-radius:8px;">
-                    <h3 style="margin-top:0;">Crear / Registrar Calificación</h3>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr 120px 1fr; gap:10px; align-items:end;">
-                        <label>Actividad
-                            <select id="create-activity-select"><option value="">-- Seleccione actividad --</option></select>
-                        </label>
-                        <label>Estudiante
-                            <select id="create-student-select"><option value="">-- Seleccione estudiante --</option></select>
-                        </label>
-                        <label>Nota
-                            <input id="create-score" type="number" min="0" max="100" />
-                        </label>
-                        <label>Feedback
-                            <textarea id="create-feedback" rows="1"></textarea>
-                        </label>
-                    </div>
-                    <div style="margin-top:10px;">
-                        <button id="btn-create" class="btn btn-primary">Crear calificación</button>
-                    </div>
-                </div>
-
-                <div class="table-card" style="padding:12px; border:1px solid #eee; border-radius:8px;">
-                    <div class="table-wrapper">
-                        <table style="width:100%; border-collapse:collapse;">
-                            <thead>
-                                <tr>
-                                    <th>Estudiante</th>
-                                    <th>Nota</th>
-                                    <th>Feedback</th>
-                                    <th>Actividad</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="grades-body">
-                                <tr><td colspan="5">Ingrese un ID de actividad y presione "Cargar".</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Modal edición de calificación (usado por grades.js) -->
-                <div id="modal-overlay" class="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:1200;"></div>
-                <div id="modal-edit" class="modal" style="display:none; position:fixed; z-index:1300; left:50%; top:50%; transform:translate(-50%,-50%); background:white; padding:16px; border-radius:8px; width:420px;">
-                    <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center;">
-                        <h2 id="modal-title">Editar calificación</h2>
-                        <button id="modal-close" class="icon-link">✕</button>
-                    </div>
-                    <div class="modal-body">
-                        <div style="margin-bottom:8px;">
-                            <label style="font-size:13px;color:#666">Estudiante</label>
-                            <div id="modal-student" style="font-weight:600;font-size:14px"></div>
-                        </div>
-                        <div style="margin-bottom:8px;">
-                            <label style="font-size:13px;color:#666">Actividad</label>
-                            <div id="modal-activity" style="font-weight:600;font-size:14px;color:#333"></div>
-                        </div>
-                        <div style="margin-bottom:8px;">
-                            <label style="font-size:13px;color:#666">Nota</label>
-                            <input id="modal-score" type="number" min="0" max="100" />
-                        </div>
-                        <div style="margin-bottom:8px;">
-                            <label style="font-size:13px;color:#666">Feedback</label>
-                            <textarea id="modal-feedback" rows="4"></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer" style="text-align:right;">
-                        <button id="modal-save" class="btn btn-primary">Guardar</button>
-                    </div>
-                </div>
             </div>
         </section>
-
         <section id="asistencia" class="view-section">
     <h2><i class="fas fa-calendar-check"></i> Registro de Accesos</h2>
     <table>
@@ -360,6 +241,41 @@
                 <button type="submit" style="background:#123E6A; color:white; border:none; padding:8px 15px; border-radius:6px; cursor:pointer;">Subir Ahora</button>
             </div>
         </form>
+    </div>
+</div>
+<!-- Modal para calificar una entrega -->
+<div id="modal-calificar" class="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1100; align-items:center; justify-content:center;">
+    <div class="modal-content" style="background:white; padding:0; border-radius:10px; width:460px; max-width:95%; box-shadow:0 10px 40px rgba(0,0,0,0.25); overflow:hidden;">
+        <div style="background:#123E6A; color:white; padding:14px 18px; display:flex; align-items:center; justify-content:space-between;">
+            <div style="display:flex; gap:10px; align-items:center;">
+                <i class="fas fa-star" style="font-size:1.1rem;"></i>
+                <strong>Calificar Entrega</strong>
+            </div>
+            <button type="button" onclick="closeGradeModal()" aria-label="Cerrar" style="background:transparent; border:none; color:white; font-size:1.1rem; cursor:pointer;">&times;</button>
+        </div>
+        <div style="padding:18px;">
+            <form id="form-calificar">
+                <input type="hidden" id="grade-activity-id">
+                <input type="hidden" id="grade-student-id">
+                <input type="hidden" id="grade-log-id">
+                <div style="margin-bottom:12px;">
+                    <label style="font-size:0.9rem; color:#444;">Estudiante:</label>
+                    <div id="grade-student-name" style="font-weight:600; margin-top:6px; font-size:0.98rem; color:#222;"></div>
+                </div>
+                <div style="margin-bottom:12px;">
+                    <label style="font-size:0.9rem; color:#444;">Puntaje (0-100):</label>
+                    <input id="grade-score" type="number" min="0" max="100" step="0.01" required style="width:100%; padding:10px; border:1px solid #e6e6e6; border-radius:6px; font-size:0.95rem;" />
+                </div>
+                <div style="margin-bottom:12px;">
+                    <label style="font-size:0.9rem; color:#444;">Comentario (opcional):</label>
+                    <textarea id="grade-feedback" rows="4" style="width:100%; padding:10px; border:1px solid #e6e6e6; border-radius:6px; font-size:0.95rem;"></textarea>
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:6px;">
+                    <button type="button" onclick="closeGradeModal()" style="background:#f3f3f3; border:none; padding:9px 14px; border-radius:6px; cursor:pointer;">Cancelar</button>
+                    <button type="submit" class="btn-primario" style="background:#123E6A; color:white; border:none; padding:9px 14px; border-radius:6px; cursor:pointer;">Guardar Calificación</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
     </main>

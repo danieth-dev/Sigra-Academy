@@ -207,7 +207,7 @@ async function cargarListaAlumnos() {
                     <tr>
                         <td>${index + 1}</td>
                         <td>${alumno.name}</td>
-                        <td><span class="status-badge">Sección 1</span></td>
+                        <td><span class="status-badge">Sección ${alumno.section_name}</span></td>
                         <td>
                             <button class="btn btn-sm btn-info" onclick="verPerfilAlumno(${alumno.user_id})">
                                 <i class="fas fa-eye"></i> Ver
@@ -436,51 +436,132 @@ async function cargarEntregasParaCalificar(){
     if(!assignmentId) return tablaBody.innerHTML = '<tr><td colspan="6">No hay asignación activa.</td></tr>';
     tablaBody.innerHTML = '<tr><td colspan="6">Cargando entregas...</td></tr>';
     try{
-        // Obtener actividades de la asignación
-        const resAct = await fetch(`${API_URL}/assignments/assignment/${assignmentId}/activities`);
-        const dataAct = await resAct.json();
-        const activities = dataAct.activities || [];
-        const rows = [];
-        for(const a of activities){
-            try{
-                const r = await fetch(`${API_URL}/submissions/activities/${a.activity_id}/submissions`);
-                const jd = await r.json();
-                const subs = jd.submissions || jd.data || [];
-                // intentar obtener calificaciones existentes para esta actividad
-                let grades = [];
-                try{
-                    const rg = await fetch(`${API_URL}/grades-log/activity/${a.activity_id}`);
-                    const jg = await rg.json();
-                    grades = jg.grades || [];
-                }catch(e){ /* ignore */ }
-
-                subs.forEach(s => {
-                    const studentName = s.student_name || s.student || s.submitter_name || '';
-                    const fileName = s.file_path || s.file_path_or_url || '';
-                    const fileUrl = fileName ? `${API_URL.replace('/api','')}/uploads/submissions/${fileName.split('\\').pop()}` : '';
-                    const gradeObj = grades.find(g => String(g.student_user_id) === String(s.student_user_id));
-                    const score = gradeObj ? (gradeObj.score ?? '-') : '-';
-                    rows.push(`
-                        <tr>
-                            <td>${studentName}</td>
-                            <td>${a.title || ''}</td>
-                            <td>${fileUrl ? `<a href="${fileUrl}" target="_blank">Ver</a>` : '-'}</td>
-                            <td>${s.submission_date ? new Date(s.submission_date).toLocaleString() : (s.created_at ? new Date(s.created_at).toLocaleString() : '-')}</td>
-                            <td>${score}</td>
-                            <td><button class="btn" onclick="window.openGradeCreate(${a.activity_id}, ${s.student_user_id})">Calificar</button></td>
-                        </tr>
-                    `);
-                })
-            }catch(e){
-                console.warn('Error cargando entregas para actividad', a.activity_id, e);
-            }
+        // Obtener todas las entregas para la asignación (incluye activity_id, student_user_id y datos de grades_log)
+        const res = await fetch(`${API_URL}/submissions/assignments/${assignmentId}/submissions`);
+        const data = await res.json();
+        const subs = data.submissions || [];
+        if(!subs.length) {
+            tablaBody.innerHTML = '<tr><td colspan="6">No hay entregas para calificar.</td></tr>';
+            return;
         }
-        tablaBody.innerHTML = rows.length ? rows.join('') : '<tr><td colspan="6">No hay entregas para calificar.</td></tr>';
+        const rows = subs.map(s => {
+            const studentName = s.full_name || s.student_name || '';
+            const title = s.title || '';
+            const fileName = s.file_path || s.file_path_or_url || '';
+            const fileUrl = fileName ? `${API_URL.replace('/api','')}/uploads/submissions/${fileName.split('\\').pop()}` : '';
+            // mostrar solo la fecha (sin hora)
+            const submissionDate = s.submission_date ? new Date(s.submission_date).toLocaleDateString() : (s.created_at ? new Date(s.created_at).toLocaleDateString() : '-');
+            const score = (s.numeric_score !== undefined && s.numeric_score !== null) ? s.numeric_score : (s.grade_name || '-');
+            const gradeLogId = s.grade_log_id || '';
+            const activityId = s.activity_id || '';
+            const studentUserId = s.student_user_id || '';
+            const gradeFeedback = s.grade_feedback || '';
+            return `
+                <tr>
+                    <td>${escapeHtml(studentName)}</td>
+                    <td>${escapeHtml(title)}</td>
+                    <td>${fileUrl ? `<a href="${fileUrl}" target="_blank">Ver</a>` : '-'}</td>
+                    <td>${submissionDate}</td>
+                    <td>${score}</td>
+                    <td>
+                        <button class="btn grade-btn"
+                            data-activity-id="${activityId}"
+                            data-student-id="${studentUserId}"
+                            data-grade-log-id="${gradeLogId}"
+                            data-student-name="${escapeHtml(studentName)}"
+                            data-score="${score}"
+                            data-feedback="${escapeHtml(gradeFeedback)}"
+                        >Calificar</button>
+                    </td>
+                </tr>
+            `;
+        });
+        tablaBody.innerHTML = rows.join('');
+
+        // adjuntar listeners a botones de calificación
+        document.querySelectorAll('.grade-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const el = e.currentTarget;
+                openGradeModal(el.dataset.activityId, el.dataset.studentId, el.dataset.studentName, el.dataset.gradeLogId, el.dataset.score, el.dataset.feedback);
+            });
+        });
     }catch(e){
         console.error('Error cargando entregas:', e);
         tablaBody.innerHTML = '<tr><td colspan="6">Error al obtener entregas.</td></tr>';
     }
 }
+
+// --- UTIL: escapar texto simple para atributos ---
+function escapeHtml(str){
+    if(!str) return '';
+    return String(str).replace(/"/g, '&quot;').replace(/'/g, "&#39;");
+}
+
+// --- FUNCIONES DEL MODAL DE CALIFICACIÓN ---
+function openGradeModal(activityId, studentUserId, studentName, gradeLogId, score){
+    const modal = document.getElementById('modal-calificar');
+    if(!modal) return;
+    document.getElementById('grade-activity-id').value = activityId || '';
+    document.getElementById('grade-student-id').value = studentUserId || '';
+    document.getElementById('grade-log-id').value = gradeLogId || '';
+    document.getElementById('grade-student-name').textContent = studentName || '';
+    document.getElementById('grade-score').value = (score && score !== '-') ? score : '';
+    document.getElementById('grade-feedback').value = '';
+    modal.style.display = 'flex';
+}
+
+function closeGradeModal(){
+    const modal = document.getElementById('modal-calificar');
+    if(!modal) return;
+    modal.style.display = 'none';
+    document.getElementById('form-calificar')?.reset();
+}
+
+// Enviar calificación (create o update según grade-log id)
+document.getElementById('form-calificar')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const activityId = document.getElementById('grade-activity-id').value;
+    const studentUserId = document.getElementById('grade-student-id').value;
+    const gradeLogId = document.getElementById('grade-log-id').value;
+    const score = document.getElementById('grade-score').value;
+    const feedback = document.getElementById('grade-feedback').value;
+    if(!activityId || !studentUserId) return alert('Faltan datos para guardar la calificación.');
+    const payload = {
+        activity_id: Number(activityId),
+        student_user_id: Number(studentUserId),
+        score: Number(score),
+        feedback: feedback || null
+    };
+    try{
+        let res;
+        if(gradeLogId){
+            // Update existing
+            res = await fetch(`${API_URL}/grades-log/update/${gradeLogId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ score: payload.score, feedback: payload.feedback })
+            });
+        } else {
+            // Create new grade log entry
+            res = await fetch(`${API_URL}/grades-log/create`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+        }
+        if(res.ok){
+            alert('✅ Calificación guardada');
+            closeGradeModal();
+            cargarEntregasParaCalificar();
+        } else {
+            const err = await res.json();
+            alert('❌ Error: ' + (err.error || 'No se pudo guardar la calificación'));
+        }
+    }catch(err){
+        console.error('Error guardando calificación:', err);
+        alert('❌ Error de conexión al guardar la calificación');
+    }
+});
 
 
 // Exponer funciones globales
@@ -493,5 +574,7 @@ Object.assign(window, {
     eliminarRecurso,
     manejarSubidaRecurso,
     cerrarSesion,
-    refreshSubmissions: cargarEntregasParaCalificar
+    refreshSubmissions: cargarEntregasParaCalificar,
+    openGradeModal,
+    closeGradeModal
 });

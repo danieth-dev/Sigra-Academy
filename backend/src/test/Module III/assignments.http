@@ -14,7 +14,7 @@ GET http://localhost:5200/api/assignments/course/1
 GET http://localhost:5200/api/assignments/assignment/2/activities
 
 ### Ruta para obtener todas las personas relacionadas a un curso asignado
-GET http://localhost:5200/api/assignments/assignment/1/people
+GET http://localhost:5200/api/assignments/assignment/5/people
 
 ### Ruta para crear una nueva asignación académica
 POST http://localhost:5200/api/assignments/create

@@ -28,8 +28,8 @@ POST http://localhost:5200/api/auth/login
 Content-Type: application/json
 
 {
-    "email": "jose.santana@example.com",
-    "password_hash": "JSa06..."
+    "email": "student11@example.com",
+    "password_hash": "hashed_password_179"
 }
 
 ### Desloguear un usuario

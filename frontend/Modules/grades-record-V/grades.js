@@ -273,16 +273,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Delegación de eventos en la tabla
-  tbody.addEventListener('click', (ev) => {
-    const btn = ev.target.closest('button[data-action]')
-    if (!btn) return
-    const action = btn.dataset.action
-    // Prefer button dataset, fallback to row data-id
-    const id = btn.dataset.id || (btn.closest && btn.closest('tr') && btn.closest('tr').dataset && btn.closest('tr').dataset.id) || null
-    if (action === 'edit') openEditModal(id)
-    if (action === 'delete') confirmAndDelete(id)
-  })
+  // Delegación de eventos en la tabla (si el tbody existe en esta página)
+  if (tbody) {
+    tbody.addEventListener('click', (ev) => {
+      const btn = ev.target.closest && ev.target.closest('button[data-action]')
+      if (!btn) return
+      const action = btn.dataset.action
+      // Prefer button dataset, fallback to row data-id
+      const id = btn.dataset.id || (btn.closest && btn.closest('tr') && btn.closest('tr').dataset && btn.closest('tr').dataset.id) || null
+      if (action === 'edit') openEditModal(id)
+      if (action === 'delete') confirmAndDelete(id)
+    })
+  }
 
   function openEditModal(id) {
     const record = currentGrades.find(r => String(r.grade_id) === String(id))
@@ -303,10 +305,10 @@ document.addEventListener('DOMContentLoaded', () => {
     currentEditId = null
   }
 
-  modalClose.addEventListener('click', closeModal)
-  overlay.addEventListener('click', closeModal)
+  if (modalClose) modalClose.addEventListener('click', closeModal)
+  if (overlay) overlay.addEventListener('click', closeModal)
 
-  modalSave.addEventListener('click', async () => {
+  if (modalSave) modalSave.addEventListener('click', async () => {
     if (!currentEditId) return closeModal()
     const payload = {
       score: Number(modalScore.value),

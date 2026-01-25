@@ -1,7 +1,7 @@
 const API_URL = 'http://localhost:5200/api/manager';
 
 const storedUser = JSON.parse(localStorage.getItem('sigra_user') || 'null');
-const STUDENT_ID = storedUser?.id || storedUser?.user_id;
+const STUDENT_ID = storedUser ? storedUser.id : 3;
 
 function getCourseImage(subjectName) {
   const name = subjectName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");

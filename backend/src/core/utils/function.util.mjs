@@ -7,12 +7,15 @@ export async function getSeedFunctionByTable(tableName, mock){
     // Se verifica si hay datos duplicados
     const checkQuery = `SELECT COUNT(*) AS count FROM ${tableName}`;
     const [result] = await db.query(checkQuery);
-
+    if(result[0].count > 0){
+        console.log(`La tabla ${tableName} ya contiene datos. Se omite la inserción de datos de prueba.`);
+        return;
+    }
     for(const item of mock){
         const columns = Object.keys(item).join(', ');
         const values = Object.values(item);
         const placeholders = values.map(() => '?').join(', ');
-        const insertQuery = `INSERT IGNORE INTO ${tableName} (${columns}) VALUES (${placeholders})`;
+        const insertQuery = `INSERT INTO ${tableName} (${columns}) VALUES (${placeholders})`;
         await db.query(insertQuery, values);
     }
 }

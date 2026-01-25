@@ -21,6 +21,22 @@ export class SubmissionController {
         }
     }
 
+    // Controlador para obtener todas las entregas de una asignación
+    getSubmissionByAssignmentId = async (req, res) => {
+        const {assignmentId} = req.params;
+        try{
+            const result = await this.model.getSubmissionByAssignmentId(Number(assignmentId));
+            if(result.error) return res.status(404).json({error: result.error});
+            return res.status(200).json({
+                message: result.message,
+                submissions: result.submissions
+            });
+        }
+        catch(error){
+            return res.status(500).json({error: 'Error al obtener las entregas'});
+        }
+    }
+
     // Controlador para obtener una entrega por su ID
     getSubmissionById = async (req, res) => {
         const {submissionId} = req.params;

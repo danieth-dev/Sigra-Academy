@@ -39,3 +39,6 @@ Content-Type: application/json
 
 ### Ruta para eliminar una entrega
 DELETE http://localhost:5200/api/submissions/delete/13
+
+### Ruta para obtener todas las entregas de una asignación
+GET http://localhost:5200/api/submissions/assignments/2/submissions
