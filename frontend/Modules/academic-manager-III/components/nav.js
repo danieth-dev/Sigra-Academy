@@ -1,36 +1,42 @@
 document.addEventListener('DOMContentLoaded', () => {
     const navHtml = `
 <header class="main-header">
-  <nav class="navbar" aria-label="Barra de navegación principal">
-    <div class="brand">
+  <nav class="navbar">
+    <a href="../../landing/index.html" class="brand">
       <img class="brand-logo" src="/frontend/Public/resources/Modulo-1/logo.png" alt="Logo SIGRA" onerror="this.style.display='none'"/>
       <span>SIGRA</span>
-    </div>
+    </a>
 
-    <div class="nav-links">
+    <div class="nav-links" id="nav-links-container">
       <a href="../../landing/index.html">Inicio</a>
       <a href="manager.view.html">Mis Cursos</a>
       <a href="schedule.html">Mi Horario</a>
       <a href="final-report.html">Boletín</a>
     </div>
 
-    <div class="profile-menu" aria-label="Menú de perfil">
-      <button class="bell" type="button" aria-label="Notificaciones">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <div class="profile-menu">
+      <button class="bell" type="button">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0" />
         </svg>
       </button>
       <div class="profile-wrapper">
-        <button class="profile-button" id="profile-button" type="button" aria-haspopup="true" aria-expanded="false">
-          <span class="profile-avatar" id="profile-avatar" aria-hidden="true">--</span>
-          <span class="sr-only">Abrir menú de perfil</span>
+        <button class="profile-button" id="profile-button" type="button">
+          <span id="profile-avatar">--</span>
         </button>
-        <div class="profile-dropdown" id="profile-dropdown" role="menu" style="display:none;">
+        <div class="profile-dropdown" id="profile-dropdown" style="display:none;">
           <div class="profile-summary">
-            <div class="profile-name" id="profile-name">Usuario</div>
-            <div class="profile-email" id="profile-email">Sin sesión</div>
+            <div class="profile-name" id="profile-name">Cargando...</div>
+            <div class="profile-email" id="profile-email">...</div>
           </div>
-          <button class="logout-btn" id="logout-button-nav" type="button">Cerrar sesión</button>
+          <button class="profile-view-btn" id="profile-view-button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            Mi Perfil
+          </button>
+          <button class="logout-btn" id="logout-button-nav">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            Cerrar Sesión
+          </button>
         </div>
       </div>
     </div>
@@ -38,80 +44,84 @@ document.addEventListener('DOMContentLoaded', () => {
 </header>
 `;
 
-    document.querySelectorAll('nav.navbar').forEach(nav => {
-      nav.outerHTML = navHtml;
-    });
+    document.querySelectorAll('nav.navbar').forEach(n => n.outerHTML = navHtml);
 
     const API_AUTH = 'http://localhost:5200/api/auth';
     const profileBtn = document.getElementById('profile-button');
     const profileDropdown = document.getElementById('profile-dropdown');
-    const profileAvatar = document.getElementById('profile-avatar');
-    const profileName = document.getElementById('profile-name');
-    const profileEmail = document.getElementById('profile-email');
-    const logoutBtn = document.getElementById('logout-button-nav');
 
-    function getStoredUser() {
-      // CORRECCIÓN: Usar la llave exacta que tienes en Application tab
-      const raw = localStorage.getItem('sigra_user');
-      if (!raw) return null;
-      try { return JSON.parse(raw); } catch (_) { return null; }
+    function highlightCurrentPage() {
+        const currentFilename = window.location.pathname.split('/').pop();
+        const links = document.querySelectorAll('.nav-links a');
+
+        links.forEach(link => {
+            link.classList.remove('active');
+            
+            // Obtiene el nombre del archivo del enlace (ej: "manager.view.html")
+            const linkHref = link.getAttribute('href');
+            const targetFilename = linkHref.split('/').pop();
+
+            // Si el archivo de la URL coincide exactamente con el del href
+            if (currentFilename === targetFilename) {
+                link.classList.add('active');
+            }
+        });
     }
 
-    function clearSession() {
-      localStorage.removeItem('sigra_token');
-      localStorage.removeItem('sigra_user');
-      localStorage.removeItem('sigra_user_raw');
+    function getStoredUser() {
+        const raw = localStorage.getItem('sigra_user');
+        if (!raw) return null;
+        try {
+            const user = JSON.parse(raw);
+            // Si el login devolvió un array, tomamos el primer elemento
+            return Array.isArray(user) ? user[0] : user;
+        } catch (_) { return null; }
     }
 
     function setProfileUI() {
-      const user = getStoredUser();
-      if (!user) return;
-      const name = `${user.first_name || ''} ${user.last_name || ''}`.trim();
-      const initials = name
-        ? name.split(' ').filter(Boolean).slice(0, 2).map(p => p[0].toUpperCase()).join('')
-        : '--';
-      if (profileAvatar) profileAvatar.textContent = initials;
-      if (profileName) profileName.textContent = name;
-      if (profileEmail) profileEmail.textContent = user.email;
+        const user = getStoredUser();
+        if (!user) return;
+        const name = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+        const initials = name.split(' ').filter(Boolean).map(n => n[0]).join('').toUpperCase().substring(0,2);
+        
+        document.getElementById('profile-avatar').textContent = initials || '--';
+        document.getElementById('profile-name').textContent = name || 'Usuario';
+        document.getElementById('profile-email').textContent = user.email || '';
     }
 
-    function toggleDropdown(forceState) {
-      if (!profileDropdown || !profileBtn) return;
-      const isOpen = profileDropdown.style.display === 'block';
-      const next = forceState !== undefined ? forceState : !isOpen;
-      profileDropdown.style.display = next ? 'block' : 'none';
+    // Toggle Dropdown
+    if(profileBtn) {
+        profileBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isVisible = profileDropdown.style.display === 'block';
+            profileDropdown.style.display = isVisible ? 'none' : 'block';
+        });
     }
 
-    async function logoutUser() {
-      const user = getStoredUser();
-      const userId = user?.id; // Usar .id según tu imagen
-      try {
-        if (userId) await fetch(`${API_AUTH}/logout/${userId}`, { method: 'POST' });
-      } catch (e) {} finally {
-        clearSession();
-        window.location.href = '../../access-control-I/login.html';
-      }
-    }
-
-    if (profileBtn) {
-      profileBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleDropdown();
-      });
-    }
-
-    document.addEventListener('click', (e) => {
-      if (profileDropdown && !profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
-        toggleDropdown(false);
-      }
+    document.addEventListener('click', () => {
+        if (profileDropdown) profileDropdown.style.display = 'none';
     });
 
-    if (logoutBtn) {
-      logoutBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        logoutUser();
-      });
+    document.getElementById('logout-button-nav').addEventListener('click', async () => {
+        const currentUser = getStoredUser();
+        const userId = currentUser?.user_id || currentUser?.id; 
+        
+        try {
+            if (userId) await fetch(`${API_AUTH}/logout/${userId}`, { method: 'POST' });
+        } catch (e) {
+            console.error("Error en logout API:", e);
+        } finally {
+            localStorage.clear();
+            window.location.href = '../../access-control-I/login.html';
+        }
+    });
+
+    if(document.getElementById('profile-view-button')) {
+        document.getElementById('profile-view-button').addEventListener('click', () => {
+            window.location.href = 'profile.html';
+        });
     }
 
     setProfileUI();
+    highlightCurrentPage();
 });
