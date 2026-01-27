@@ -421,6 +421,9 @@ function showSection(sectionId) {
             cargarEntregasParaCalificar();
         }
         if (sectionId === 'asistencia') cargarTablaAsistencia();
+        if (sectionId === 'perfil-profesor') {
+            cargarDatosPerfil();
+        }
     }
 }
 function cerrarSesion() {
@@ -562,9 +565,61 @@ document.getElementById('form-calificar')?.addEventListener('submit', async (e) 
         alert('❌ Error de conexión al guardar la calificación');
     }
 });
+// Cargar datos en los inputs cuando se entra a la sección
+function cargarDatosPerfil() {
+    const user = JSON.parse(localStorage.getItem('sigra_user'));
+    if (user) {
+        document.getElementById('perf-email').value = user.email || '';
+        document.getElementById('perf-phone').value = user.phone || '';
+        document.getElementById('perf-pass').value = ''; // La contraseña siempre vacía por seguridad
+    }
+}
 
+// --- ACTUALIZACIÓN DE PERFIL (Ruta: /api/auth/update/:id) ---
+document.getElementById('form-perfil-profesor')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const user = JSON.parse(localStorage.getItem('sigra_user'));
+    // Obtenemos el ID dinámicamente (en tu caso será el 9)
+    const userId = user.user_id || user.id; 
+    
+    const updatedData = {
+        email: document.getElementById('perf-email').value,
+        phone: document.getElementById('perf-phone').value
+    };
 
-// Exponer funciones globales
+    // Solo incluimos la contraseña si el campo no está vacío
+    const newPass = document.getElementById('perf-pass').value;
+    if (newPass.trim() !== "") {
+        updatedData.password_hash = newPass;
+    }
+
+    try {
+        // CAMBIO CLAVE: Usamos la ruta /auth/update/ que me pasaste
+        const res = await fetch(`${API_URL}/auth/update/${userId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedData)
+        });
+
+        if (res.ok) {
+            alert("✅ Perfil actualizado correctamente.");
+            
+            // Actualizamos los datos en el navegador para que no salgan los viejos
+            const newUser = { ...user, ...updatedData };
+            localStorage.setItem('sigra_user', JSON.stringify(newUser));
+            
+            // Volver a la vista de inicio
+            showSection('inicio');
+        } else {
+            const error = await res.json();
+            alert("❌ Error: " + (error.message || "No se pudo actualizar el perfil"));
+        }
+    } catch (error) {
+        console.error("Error en la petición de perfil:", error);
+        alert("Error de conexión con el servidor");
+    }
+});
 // --- EXPOSICIÓN GLOBAL ---
 Object.assign(window, {
     showSection,

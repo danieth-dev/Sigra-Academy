@@ -22,12 +22,17 @@
             <a href="#" onclick="showSection('tareas-recibidas')">Calificar</a>
             <a href="#" onclick="showSection('asistencia')">Asistencia</a>
         </div>
-        <div class="user-profile">
-            <span id="prof-user-name">Cargando...</span>
-            <button onclick="cerrarSesion()" class="btn-logout" title="Cerrar Sesión">
-            <i class="fas fa-sign-out-alt"></i> Salir
-            </button>
-        </div>
+        <div class="user-profile" style="display: flex; align-items: center; gap: 15px;">
+            <span id="prof-user-name" style="font-weight: bold;">Cargando...</span>
+            <button onclick="showSection('perfil-profesor')" class="btn-icon-settings" title="Configuración de Perfil" 
+            style="background: none; border: none; color: rgb(10, 6, 243); cursor: pointer; font-size: 1.2rem;">
+        <i class="fas fa-user-cog"></i>
+    </button>
+
+    <button onclick="cerrarSesion()" class="btn-logout" title="Cerrar Sesión">
+        <i class="fas fa-sign-out-alt"></i>
+    </button>
+</div>
     </nav>
 
     <main class="container">
@@ -214,6 +219,36 @@
         <tbody id="lista-asistencia-body">
             </tbody>
     </table>
+</section>
+<section id="perfil-profesor" class="view-section" style="display:none;">
+    <div class="section-header">
+        <h2><i class="fas fa-user-cog"></i> Configuración de Perfil</h2>
+    </div>
+
+    <div class="card" style="max-width: 500px; margin: 20px auto;">
+        <form id="form-perfil-profesor">
+            <div class="form-group">
+                <label><i class="fas fa-envelope"></i> Correo Electrónico</label>
+                <input type="email" id="perf-email" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label><i class="fas fa-phone"></i> Teléfono</label>
+                <input type="text" id="perf-phone" class="form-control" required>
+            </div>
+
+            <hr style="margin: 20px 0; border: 0; border-top: 1px dashed #ccc;">
+            
+            <div class="form-group">
+                <label><i class="fas fa-lock"></i> Nueva Contraseña</label>
+                <input type="password" id="perf-pass" class="form-control" placeholder="Dejar en blanco para no cambiar">
+            </div>
+
+            <button type="submit" class="btn-primario" style="width:100%; margin-top:15px; background:#27ae60;">
+                <i class="fas fa-save"></i> Guardar Cambios
+            </button>
+        </form>
+    </div>
 </section>
 <div id="modal-recurso" class="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
     <div class="modal-content" style="background:white; padding:25px; border-radius:12px; width:400px; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
