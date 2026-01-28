@@ -36,6 +36,15 @@ document.addEventListener('DOMContentLoaded', function() {
         if (rol === 'estudiante') {
             rolExtraFields.innerHTML = `
                 <div class="input-group">
+                    <label class="input-label" for="rep-id">Cédula del representante</label>
+                    <div class="input-control">
+                        <span class="input-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7l8 5 8-5" /><rect x="3" y="5" width="18" height="14" rx="2" /></svg>
+                        </span>
+                        <input id="rep-id" type="text" placeholder="Ej. 12345678" required />
+                    </div>
+                </div>
+                <div class="input-group">
                     <label class="input-label" for="rep-names">Nombre del representante</label>
                     <div class="input-control">
                         <span class="input-icon">
@@ -53,33 +62,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         <input id="rep-lastnames" type="text" placeholder="Ej. Pérez Díaz" required />
                     </div>
                 </div>
-                <div class="input-group">
-                    <label class="input-label" for="rep-id">Cédula del representante</label>
-                    <div class="input-control">
-                        <span class="input-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7l8 5 8-5" /><rect x="3" y="5" width="18" height="14" rx="2" /></svg>
-                        </span>
-                        <input id="rep-id" type="text" placeholder="Ej. V-12345678" required />
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label class="input-label" for="rep-phone">Número del representante</label>
-                    <div class="input-control">
-                        <span class="input-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                        </span>
-                        <input id="rep-phone" type="tel" placeholder="Ej. +58 412..." required />
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label class="input-label" for="rep-email">Correo del representante</label>
-                    <div class="input-control">
-                        <span class="input-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7l8 5 8-5" /><rect x="3" y="5" width="18" height="14" rx="2" /></svg>
-                        </span>
-                        <input id="rep-email" type="email" placeholder="Ej. representante@correo.com" required />
-                    </div>
-                </div>
             `;
             return;
         }
@@ -94,6 +76,51 @@ document.addEventListener('DOMContentLoaded', function() {
         renderExtraFields(e.target.value);
     });
 
+    // Mostrar/Ocultar mensaje de requisitos de contraseña
+    const passwordInput = document.getElementById('password');
+    if (passwordInput) {
+        // Crear el mensaje y agregarlo al DOM
+        const passwordGroup = passwordInput.closest('.input-group');
+        if (passwordGroup) {
+            const requirementsMsg = document.createElement('div');
+            requirementsMsg.id = 'password-requirements-msg';
+            requirementsMsg.style.display = 'none';
+            requirementsMsg.style.background = '#f8d7da'; // color de fondo suave tipo alerta
+            requirementsMsg.style.border = '1px solid #f5c2c7';
+            requirementsMsg.style.borderRadius = '6px';
+            requirementsMsg.style.padding = '10px 16px 10px 32px';
+            requirementsMsg.style.marginBottom = '8px';
+            requirementsMsg.style.color = '#842029';
+            requirementsMsg.style.fontSize = '0.97em';
+            requirementsMsg.style.boxShadow = '0 1px 4px rgba(0,0,0,0.04)';
+            requirementsMsg.innerHTML = `
+                <strong>La contraseña debe cumplir con:</strong>
+                <ul style="margin: 6px 0 0 18px; padding: 0; list-style: disc; color: #842029;">
+                  <li>Entre 8 y 20 caracteres</li>
+                  <li>Al menos una letra mayúscula</li>
+                  <li>Al menos una letra minúscula</li>
+                  <li>Al menos un número</li>
+                  <li>Al menos uno de estos caracteres: <b>- _ + * / ?</b></li>
+                </ul>
+            `;
+            passwordGroup.insertBefore(requirementsMsg, passwordGroup.firstChild);
+
+            passwordInput.addEventListener('focus', function() {
+                requirementsMsg.style.display = 'block';
+            });
+            passwordInput.addEventListener('input', function() {
+                if (passwordInput.value.length > 0) {
+                    requirementsMsg.style.display = 'none';
+                }
+            });
+            passwordInput.addEventListener('blur', function() {
+                if (passwordInput.value.length === 0) {
+                    requirementsMsg.style.display = 'none';
+                }
+            });
+        }
+    }
+
     // Handler para crear usuario al presionar "Aceptar"
     const btnAceptar = document.getElementById('btnAceptar');
     if (btnAceptar) {
@@ -102,26 +129,37 @@ document.addEventListener('DOMContentLoaded', function() {
             const lastName = document.getElementById('lastnames')?.value?.trim();
             const email = document.getElementById('email')?.value?.trim();
             const phone = document.getElementById('phone')?.value?.trim();
+            const nationalId = document.getElementById('national_id')?.value?.trim();
             const password = document.getElementById('password')?.value || '';
             const confirmPassword = document.getElementById('confirm-password')?.value || '';
             const rol = document.getElementById('rolSelect')?.value || '';
 
             const repFirstName = document.getElementById('rep-names')?.value?.trim();
             const repLastName = document.getElementById('rep-lastnames')?.value?.trim();
-            const repId = document.getElementById('rep-id')?.value?.trim();
-            const repPhone = document.getElementById('rep-phone')?.value?.trim();
-            const repEmail = document.getElementById('rep-email')?.value?.trim();
+            const repNationalId = document.getElementById('rep-id')?.value?.trim();
 
-            // Validaciones mínimas
-            if (!firstName || !lastName || !email || !phone || !password || !rol) {
+
+
+            // Limpiar el teléfono y cédulas para dejar solo dígitos
+            const digitsOnlyPhone = (phone || '').replace(/\D/g, '');
+            const digitsOnlyNationalId = (nationalId || '').replace(/\D/g, '');
+            const digitsOnlyRepNationalId = (repNationalId || '').replace(/\D/g, '');
+
+            // Validación: todos los campos obligatorios (excepto los de representante si no es estudiante)
+            if (!firstName || !lastName || !email || !phone || !nationalId || !password || !rol) {
                 alert('Por favor completa todos los campos requeridos.');
                 return;
             }
 
-            // Validar teléfono: exactamente 12 dígitos
-            const digitsOnlyPhone = (phone || '').replace(/\D/g, '');
-            if (digitsOnlyPhone.length !== 12) {
-                alert('El número de teléfono debe contener exactamente 12 dígitos.');
+            // Validación: cédula del usuario (exactamente 8 dígitos)
+            if (!/^[0-9]{8}$/.test(digitsOnlyNationalId)) {
+                alert('La cédula del usuario debe tener exactamente 8 dígitos.');
+                return;
+            }
+
+            // Validación: teléfono (exactamente 11 dígitos)
+            if (!/^[0-9]{11}$/.test(digitsOnlyPhone)) {
+                alert('El número de teléfono debe tener exactamente 11 dígitos.');
                 return;
             }
 
@@ -144,10 +182,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            // Campos obligatorios si es estudiante
+
+            // Validaciones de representante solo si es estudiante
             if (rol === 'estudiante') {
-                if (!repFirstName || !repLastName || !repId || !repPhone || !repEmail) {
+                if (!repFirstName || !repLastName || !repNationalId) {
                     alert('Completa todos los datos del representante.');
+                    return;
+                }
+                // Validación: cédula del representante (exactamente 8 dígitos)
+                if (!/^[0-9]{8}$/.test(digitsOnlyRepNationalId)) {
+                    alert('La cédula del representante debe tener exactamente 8 dígitos.');
                     return;
                 }
             }
@@ -166,7 +210,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 last_name: lastName,
                 email,
                 phone: digitsOnlyPhone,
-                password_hash: password
+                national_id: digitsOnlyNationalId,
+                password_hash: password,
+                parents_national_id: rol === 'estudiante' ? String(Number(digitsOnlyRepNationalId)) : "",
+                parents_first_name: rol === 'estudiante' ? repFirstName : "",
+                parents_last_name: rol === 'estudiante' ? repLastName : ""
+
             };
 
             const API_BASE = 'http://localhost:5200/api';
@@ -191,10 +240,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 alert('Usuario creado correctamente');
+                console.log('Usuario creado:', data);
                 // Redirigir a la tabla de usuarios
                 window.location.href = 'user-table.html';
             } catch (err) {
                 alert('Error de red: ' + (err?.message || 'intenta nuevamente'));
+                console.log(payload);
             }
         });
     }

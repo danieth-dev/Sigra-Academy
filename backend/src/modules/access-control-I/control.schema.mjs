@@ -8,7 +8,22 @@ const createdSchemaUser = z.object({
   last_name: z.string().min(1).max(50),
   email: z.string().email().max(100),
   phone: z.string().min(7).max(15),
-  password_hash: z.string().min(6).max(100)
+  password_hash: z.string().min(6).max(100),
+    parents_national_id: z.union([
+      z.string().regex(/^\d+$/,{ message: 'parents_national_id debe contener solo números' }).min(6).max(20),
+      z.literal(''),
+      z.null()
+    ]).optional(),
+    parents_first_name: z.union([
+      z.string().min(1).max(50),
+      z.literal(''),
+      z.null()
+    ]).optional(),
+    parents_last_name: z.union([
+      z.string().min(1).max(50),
+      z.literal(''),
+      z.null()
+    ]).optional()
 });
 
 // Esquema de validación para el inicio de sesión de un usuario
@@ -26,7 +41,23 @@ const updateSchemaUser = z.object({
   email: z.string().email().max(100).optional(),
   phone: z.string().min(7).max(15).optional(),
   password_hash: z.string().min(6).max(100).optional(),
-  is_active: z.boolean().optional()
+  password: z.string().min(6).max(100).optional(),
+  is_active: z.boolean().optional(),
+    parents_national_id: z.union([
+      z.string().regex(/^\d+$/,{ message: 'parents_national_id debe contener solo números' }).min(6).max(20),
+      z.literal(''),
+      z.null()
+    ]).optional(),
+    parents_first_name: z.union([
+      z.string().min(1).max(50),
+      z.literal(''),
+      z.null()
+    ]).optional(),
+    parents_last_name: z.union([
+      z.string().min(1).max(50),
+      z.literal(''),
+      z.null()
+    ]).optional()
 });
 
 // Función para validar los datos de creación de un usuario

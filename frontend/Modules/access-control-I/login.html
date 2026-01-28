@@ -238,15 +238,9 @@
             localStorage.setItem('sigra_token', result.token)
           }
 
-          const safeUser = {
-            id: user.user_id,
-            role_id: roleId,
-            first_name: user.first_name,
-            last_name: user.last_name,
-            national_id: user.national_id,
-            email: user.email,
-            phone: user.phone
-          }
+
+          // Guardar todos los datos recibidos del usuario menos la contraseña
+          const { password_hash, ...safeUser } = user
           localStorage.setItem('sigra_user', JSON.stringify(safeUser))
 
           if (roleId === 1) {

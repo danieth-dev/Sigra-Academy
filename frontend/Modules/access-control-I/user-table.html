@@ -19,6 +19,7 @@
 
       <div class="nav-links" role="list">
         <a class="active" href="user-table.html" role="listitem">Inicio</a>
+        <a href="registro.html" role="listitem">Crear Usuario</a>
         <a href="../academic-structure-II/catalogo-materias/index.html" role="listitem">Catalogo</a>
         <a href="../academic-structure-II/gestion-materias/index.html" role="listitem">Materias</a>
         <a href="../academic-structure-II/gestion-horarios/index.html" role="listitem">Horarios</a>
@@ -36,10 +37,9 @@
         <div class="profile-dropdown" id="profile-dropdown" role="menu">
           <ul class="profile-list" role="menu">
             <li class="profile-info" id="profile-info-name" role="presentation">Usuario</li>
-            <li role="none"><button type="button" class="profile-item" data-profile-action="create"
-                role="menuitem">Crear usuario</button></li>
-            <li role="none"><button type="button" class="profile-item" data-profile-action="edit" role="menuitem">Editar
-                usuario</button></li>
+            
+            <li role="none"><button type="button" class="profile-item" data-profile-action="view" role="menuitem">Ver usuario</button></li>
+            <li role="none"><button type="button" class="profile-item" data-profile-action="edit" role="menuitem">Editar usuario</button></li>
             <li role="none"><button type="button" class="profile-item" data-profile-action="logout"
                 role="menuitem">Cerrar sesión</button></li>
           </ul>
@@ -71,9 +71,6 @@
             <option value="4">Control de Estudios</option>
           </select>
         </div>
-      </div>
-      <div class="actions">
-        <button class="ghost-btn" type="button" id="add-user-btn">Agregar usuario nuevo</button>
       </div>
     </div>
 
@@ -480,12 +477,48 @@
             input.disabled = mode === 'view'
           }
         })
+
+        // Mostrar inputs de representante solo para estudiantes
+        const isStudent = Number(user.role_id) === 3
+        // Ocultar bloque antiguo si existe (evitar duplicados)
+        const oldRepWrap = document.getElementById('representative-fields')
+        if (oldRepWrap) oldRepWrap.style.display = 'none'
+
+        const repWrap = document.getElementById('representative-inline-fields')
+        const repNationalTop = document.getElementById('modal-parents_national_id-top')
+        const repFirstTop = document.getElementById('modal-parents_first_name-top')
+        const repLastTop = document.getElementById('modal-parents_last_name-top')
+
+        if (repWrap && repNationalTop && repFirstTop && repLastTop) {
+          if (isStudent) {
+            repWrap.style.display = 'block'
+            repNationalTop.value = user.parents_national_id ?? ''
+            repFirstTop.value = user.parents_first_name ?? ''
+            repLastTop.value = user.parents_last_name ?? ''
+            const disabled = (mode === 'view')
+            repNationalTop.disabled = disabled
+            repFirstTop.disabled = disabled
+            repLastTop.disabled = disabled
+          } else {
+            repWrap.style.display = 'none'
+            repNationalTop.value = ''
+            repFirstTop.value = ''
+            repLastTop.value = ''
+          }
+        }
         
         // La contraseña no se prellena por seguridad; habilitada solo en edición
         const pwdInput = document.getElementById('modal-password')
         if (pwdInput) {
           pwdInput.value = ''
           pwdInput.disabled = mode === 'view'
+        }
+
+        // Confirmar contraseña también debe estar deshabilitado en modo 'ver'
+        const confirmPwdInput = document.getElementById('modal-confirm-password')
+        if (confirmPwdInput) {
+          confirmPwdInput.value = ''
+          confirmPwdInput.disabled = mode === 'view'
         }
 
         modal.dataset.mode = mode
@@ -505,18 +538,59 @@
           return
         }
 
+        const selectedRoleId = Number(document.getElementById('modal-role_id').value) || currentUser.role_id
+
         const payload = {
           first_name: document.getElementById('modal-first_name').value.trim(),
           last_name: document.getElementById('modal-last_name').value.trim(),
           national_id: document.getElementById('modal-national_id').value.trim(),
           email: document.getElementById('modal-email').value.trim(),
           phone: document.getElementById('modal-phone').value.trim(),
-          role_id: Number(document.getElementById('modal-role_id').value) || currentUser.role_id,
+          role_id: selectedRoleId,
           is_active: document.getElementById('modal-is_active').checked
         }
 
+        // Tomar campos del representante (solo relevantes para estudiantes)
+        const repNationalTop = document.getElementById('modal-parents_national_id-top')
+        const repFirstTop = document.getElementById('modal-parents_first_name-top')
+        const repLastTop = document.getElementById('modal-parents_last_name-top')
+        const repNationalVal = (repNationalTop?.value || '').trim()
+        const repFirstVal = (repFirstTop?.value || '').trim()
+        const repLastVal = (repLastTop?.value || '').trim()
+
+        if (selectedRoleId === 3) {
+          payload.parents_national_id = repNationalVal || ''
+          payload.parents_first_name = repFirstVal || ''
+          payload.parents_last_name = repLastVal || ''
+        } else {
+          // Si deja de ser estudiante, limpiar campos en backend
+          payload.parents_national_id = null
+          payload.parents_first_name = null
+          payload.parents_last_name = null
+        }
+
         const newPassword = (document.getElementById('modal-password')?.value || '').trim()
-        if (newPassword) payload.password = newPassword
+        const confirmPassword = (document.getElementById('modal-confirm-password')?.value || '').trim()
+        if (newPassword) {
+          if (!confirmPassword) {
+            alert('Confirma la contraseña.')
+            return
+          }
+          if (newPassword !== confirmPassword) {
+            alert('Las contraseñas no coinciden.')
+            return
+          }
+          if (newPassword.length < 8 || newPassword.length > 20) {
+            alert('La contraseña debe tener entre 8 y 20 caracteres.')
+            return
+          }
+          const pwdRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[-_+\*\/\?]).+$/
+          if (!pwdRegex.test(newPassword)) {
+            alert('La contraseña debe contener al menos: una letra mayúscula, una letra minúscula, un número y uno de los caracteres permitidos: - _ + * / ?')
+            return
+          }
+          payload.password_hash = newPassword
+        }
 
         // Detectar cambios respecto al usuario actual
         const changed = (
@@ -527,6 +601,18 @@
           payload.phone !== (currentUser.phone || '') ||
           Number(payload.role_id) !== Number(currentUser.role_id) ||
           Boolean(payload.is_active) !== Boolean(currentUser.is_active) ||
+          // Cambios en datos del representante
+          (Number(payload.role_id) === 3 && (
+            (payload.parents_national_id || '') !== (currentUser.parents_national_id || '') ||
+            (payload.parents_first_name || '') !== (currentUser.parents_first_name || '') ||
+            (payload.parents_last_name || '') !== (currentUser.parents_last_name || '')
+          )) ||
+          // Si deja de ser estudiante y tenía datos de representante, también cuenta como cambio
+          (Number(currentUser.role_id) === 3 && Number(payload.role_id) !== 3 && (
+            (currentUser.parents_national_id || '') !== '' ||
+            (currentUser.parents_first_name || '') !== '' ||
+            (currentUser.parents_last_name || '') !== ''
+          )) ||
           Boolean(newPassword)
         )
 
@@ -576,6 +662,21 @@
       if (loggedRoleIdInit === 4) {
         if (addUserBtn) addUserBtn.style.display = 'none'
         if (profileCreateItem) profileCreateItem.style.display = 'none'
+
+        // Ajustar navbar para rol Control de Estudios (id = 4)
+        const navLinks = document.querySelector('.nav-links')
+        if (navLinks) {
+          const links = [
+            '<a class="active" href="user-table.html" role="listitem">Inicio</a>',
+            '<a href="../academic-structure-II/catalogo-materias/index.html" role="listitem">Catalogo</a>',
+            '<a href="../academic-structure-II/gestion-materias/index.html" role="listitem">Materias</a>',
+            '<a href="../academic-structure-II/definicion-prelaciones/index.html" role="listitem">Prelaciones</a>',
+            '<a href="../academic-structure-II/gestion-horarios/index.html" role="listitem">Horarios</a>',
+            '<a href="../academic-structure-II/Gestionar Asignaciones/index.html" role="listitem">Inscripción</a>',
+            '<a href="../academic-structure-II/Gestionar Asignaciones/gestionar-asignacion.html" role="listitem">Gestionar Asignación</a>'
+          ]
+          navLinks.innerHTML = links.join('')
+        }
       }
       if (addUserBtn) {
         addUserBtn.addEventListener('click', () => {
@@ -599,6 +700,14 @@
         if (action === 'create') {
           if (getLoggedRoleId() === 4) return
           window.location.href = './registro.html'
+          return
+        }
+
+        if (action === 'view') {
+          const stored = getStoredUser()
+          if (stored) {
+            openModal(stored, 'view')
+          }
           return
         }
 
@@ -650,7 +759,7 @@
   </script>
 
   <div id="user-modal-overlay" class="modal-overlay"></div>
-  <div id="user-modal" class="modal">
+  <div id="user-modal" class="modal" style="max-width: 420px; min-width: 320px; width: 90vw; max-height: 80vh; overflow-y: auto;">
     <div class="modal-header">
       <h2 id="user-modal-title">Detalle de usuario</h2>
       <button id="modal-close" type="button" aria-label="Cerrar" class="icon-link">✕</button>
@@ -672,9 +781,27 @@
         Correo
         <input id="modal-email" type="email" />
       </label>
+      <div id="representative-inline-fields" style="display:none; margin-top: 8px;">
+        <label>
+          Cédula del representante
+          <input id="modal-parents_national_id-top" type="text" inputmode="numeric" />
+        </label>
+        <label>
+          Nombre del representante
+          <input id="modal-parents_first_name-top" type="text" />
+        </label>
+        <label>
+          Apellido del representante
+          <input id="modal-parents_last_name-top" type="text" />
+        </label>
+      </div>
       <label>
         Contraseña (opcional)
         <input id="modal-password" type="password" placeholder="Dejar en blanco para no cambiar" autocomplete="new-password" />
+      </label>
+      <label>
+        Confirmar Contraseña
+        <input id="modal-confirm-password" type="password" placeholder="Repite la contraseña" autocomplete="new-password" />
       </label>
       <label>
         Teléfono
@@ -689,6 +816,20 @@
           <option value="1" disabled>Administrador (solo lectura)</option>
         </select>
       </label>
+      <div id="representative-fields" style="display:none; margin-top: 8px;">
+        <label>
+          Cédula del representante
+          <input id="modal-parents_national_id" type="text" inputmode="numeric" />
+        </label>
+        <label>
+          Nombre del representante
+          <input id="modal-parents_first_name" type="text" />
+        </label>
+        <label>
+          Apellido del representante
+          <input id="modal-parents_last_name" type="text" />
+        </label>
+      </div>
       <label class="switch-line">
         <span>Activo</span>
         <input id="modal-is_active" type="checkbox" />
@@ -697,6 +838,7 @@
     <div class="modal-footer">
       <button id="modal-save" type="button" class="primary-button">Guardar</button>
     </div>
+  <script src="user-table.js"></script>
   </div>
 </body>
 

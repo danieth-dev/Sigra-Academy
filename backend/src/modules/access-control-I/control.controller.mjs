@@ -142,7 +142,12 @@ export class ControlController {
 					details: validation.error
 				});
 			}
-			const result = await this.model.updateUser(userId, validation.data);
+			const payload = { ...validation.data };
+			if(payload.password && !payload.password_hash){
+				payload.password_hash = payload.password;
+			}
+			delete payload.password;
+			const result = await this.model.updateUser(userId, payload);
 			if(result.error) return res.status(400).json({error: result.error});
 			return res.status(200).json({
 				message: result.message,

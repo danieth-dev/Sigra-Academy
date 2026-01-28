@@ -1,3 +1,14 @@
+  <script>
+    // Solo permitir acceso a admin (role_id === 1)
+    (function () {
+      const raw = localStorage.getItem('sigra_user')
+      let user = null
+      try { user = JSON.parse(raw) } catch (_) {}
+      if (!user || Number(user.role_id) !== 1) {
+        window.location.href = 'user-table.html'
+      }
+    })()
+  </script>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -15,10 +26,33 @@
 
 <body>
   <header>
-    
+    <nav class="navbar" aria-label="Barra de navegación principal">
+      <a class="brand" aria-label="SIGRA" href="user-table.html">
+        <img class="brand-logo" src="../../Public/resources/Modulo-1/logo.png" alt="Logo SIGRA" />
+        <span>SIGRA</span>
+      </a>
 
+      <div class="nav-links" role="list">
+        <a href="user-table.html" role="listitem">Inicio</a>
+        <a class="active" href="registro.html" role="listitem">Crear Usuario</a>
+      </div>
+
+      <div class="profile-menu" aria-label="Menú de perfil">
+        <button class="profile-button" id="profile-button" type="button" aria-haspopup="true" aria-expanded="false">
+          <span class="profile-avatar" id="profile-avatar" aria-hidden="true">--</span>
+          <span class="sr-only">Abrir menú de perfil</span>
+        </button>
+        <div class="profile-dropdown" id="profile-dropdown" role="menu">
+          <ul class="profile-list" role="menu">
+            <li class="profile-info" id="profile-info-name" role="presentation">Usuario</li>
+            <li role="none"><button type="button" class="profile-item" data-profile-action="view" role="menuitem">Ver usuario</button></li>
+            <li role="none"><button type="button" class="profile-item" data-profile-action="edit" role="menuitem">Editar usuario</button></li>
+            <li role="none"><button type="button" class="profile-item" data-profile-action="logout" role="menuitem">Cerrar sesión</button></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
   </header>
-  <a class="back-button" href="user-table.html" aria-label="Volver">Volver</a>
   <main class="page">
     <div class="brand">
       <img class="brand-logo" src="../../Public/resources/Modulo-1/logo.png" alt="Logo SIGRA" />
@@ -58,6 +92,14 @@
             <input id="lastnames" type="text" placeholder="Ej. Pérez Delgado" required />
           </div>
         </div>
+        
+        <div class="input-group">
+          <label class="input-label" for="national_id">Cédula</label>
+          <div class="input-control">
+            <span class="input-icon" style="font-weight: bold; font-size: 1rem;">CI</span>
+            <input id="national_id" type="text" placeholder="12345678" pattern="[0-9]{8}" maxlength="8" minlength="8" required />
+          </div>
+        </div>
 
         <div class="input-group">
           <label class="input-label" for="email">Correo Electrónico</label>
@@ -83,7 +125,33 @@
                   d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
               </svg>
             </span>
-            <input id="phone" type="tel" placeholder="+58 412..." required />
+            <input id="phone" type="tel" placeholder="0412234..." pattern="[0-9]{11}" maxlength="11" minlength="11" required />
+            <script>
+              // Solo permitir acceso a admin (role_id === 1)
+              (function () {
+                const raw = localStorage.getItem('sigra_user')
+                let user = null
+                try { user = JSON.parse(raw) } catch (_) {}
+                if (!user || Number(user.role_id) !== 1) {
+                  window.location.href = 'user-table.html'
+                }
+              })()
+
+              // Validar que el teléfono tenga exactamente 11 dígitos numéricos
+              document.addEventListener('DOMContentLoaded', function () {
+                const phoneInput = document.getElementById('phone');
+                if (phoneInput) {
+                  phoneInput.addEventListener('input', function () {
+                    // Solo permitir números
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                    // Limitar a 11 caracteres
+                    if (this.value.length > 11) {
+                      this.value = this.value.slice(0, 11);
+                    }
+                  });
+                }
+              });
+            </script>
           </div>
         </div>
 

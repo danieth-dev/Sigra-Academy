@@ -96,9 +96,20 @@ export class UserModel {
 		// Si todo esta bien, se crea el usuario, se hashea la contraseña
 		const hashedPassword = await bcrypt.hash(rest.password_hash, 10);
 		const [result] = await db.query(
-			`INSERT INTO users (role_id, national_id, first_name, last_name, email, phone, password_hash)
-			VALUES (?, ?, ?, ?, ?, ?, ?)`,
-			[role_id, rest.national_id, rest.first_name, rest.last_name, rest.email, rest.phone, hashedPassword]
+			`INSERT INTO users (role_id, national_id, first_name, last_name, email, phone, password_hash, parents_national_id, parents_first_name, parents_last_name)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			[
+				role_id,
+				rest.national_id,
+				rest.first_name,
+				rest.last_name,
+				rest.email,
+				rest.phone,
+				hashedPassword,
+				rest.parents_national_id ?? null,
+				rest.parents_first_name ?? null,
+				rest.parents_last_name ?? null
+			]
 		);
 		// Se obtiene el usuario creado
 		const [createdUser] = await db.query(
@@ -193,7 +204,7 @@ export class UserModel {
 	static async updateUser(userId, data){
 		if(!userId || !data) return {error: 'Faltan datos para actualizar el usuario'};
 		// Se asigna los campos que se van a actualizar
-		const allowedFields = ['role_id', 'national_id', 'first_name', 'last_name', 'email', 'phone', 'password_hash', 'is_active'];
+		const allowedFields = ['role_id', 'national_id', 'first_name', 'last_name', 'email', 'phone', 'password_hash', 'is_active', 'parents_national_id', 'parents_first_name', 'parents_last_name'];
 		const updateToFields = {};
 		for(const field of allowedFields){
 			if(data[field] !== undefined){
